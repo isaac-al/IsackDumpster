@@ -1,0 +1,17 @@
+{
+"Items":
+  [
+    {
+      "Name": "Wood",
+      "Key": "Aa"
+    },
+    {
+      "Name": "Stone",
+      "Key": "Ba"
+    },
+    {
+      "Name": "Stone Axe",
+      "Key": "AaAaBa"
+    }
+  ]
+}
