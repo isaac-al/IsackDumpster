@@ -20,9 +20,10 @@ public class InventoryScreen : MonoBehaviour
 
         foreach (var item in m_Inventory.GetInventoryItems())
         {
-            GameObject button = Instantiate(ButtonPrefab);
-            button.transform.SetParent(m_ItemWrapper.transform);
-            Text buttonText = button.GetComponentInChildren<Text>();
+            GameObject invItem = Instantiate(ButtonPrefab);
+            invItem.transform.SetParent(m_ItemWrapper.transform);
+            invItem.name = item.Name;
+            Text buttonText = invItem.GetComponentInChildren<Text>();
             buttonText.text = item.Name;
         }
     }

@@ -18,11 +18,11 @@ public class Inventory : MonoBehaviour
         return tKeyList;
     }
 
-    public void AddItemToInventory(Item pItem)
+    public void AddItemToInventory(Item _item)
     {
         if (m_ItemList == null) m_ItemList = new List<Item>();
 
-        m_ItemList.Add(pItem);
+        m_ItemList.Add(_item);
     }
 
     public List<Item> GetInventoryItems()
@@ -32,5 +32,13 @@ public class Inventory : MonoBehaviour
         return m_ItemList;
     }
 
-    // TODO : Make inventory GUI - grid list of items (use text as image placeholder)
+    public void RemoveItem(Item _item)
+    {
+        m_ItemList.Remove(_item);
+    }
+
+    public void RemoveItem(string _name)
+    {
+        m_ItemList.Remove(m_ItemList.Find(x => x.Name.Equals(_name)));
+    }
 }
