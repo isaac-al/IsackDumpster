@@ -13,5 +13,7 @@ UCLASS()
 class JINGLEJAMSANDWICH_API AJingleJamSandwichGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+		virtual void BeginPlay() override;
 	
 };

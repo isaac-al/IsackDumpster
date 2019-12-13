@@ -3,3 +3,7 @@
 
 #include "JingleJamSandwichGameModeBase.h"
 
+void AJingleJamSandwichGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+}
