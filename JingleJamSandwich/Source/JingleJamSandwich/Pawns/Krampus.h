@@ -30,10 +30,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 		USkeletalMeshComponent* mesh;
-	UPROPERTY(BlueprintReadWrite)
-		USkeleton* skeleton = nullptr;
-	UPROPERTY(BlueprintReadWrite)
-		UPhysicsAsset* physicsAsset = nullptr;
 
 	UPROPERTY(BlueprintReadWrite)
 		UCapsuleComponent* CapsuleComp;
@@ -42,7 +38,7 @@ public:
 		void LoadMesh();
 
 	FVector Velocity;
-	float SpeedModifier = 2500.0f;
+	float SpeedModifier = 250.0f;
 
 	void MoveX(float amount);
 	void MoveY(float amount);

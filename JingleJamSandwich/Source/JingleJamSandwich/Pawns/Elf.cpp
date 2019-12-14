@@ -15,11 +15,11 @@ AElf::AElf()
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	SetRootComponent(mesh);
-	//CapsuleComp->AttachToComponent(RootComponent);
 	CapsuleComp->SetCapsuleHalfHeight(500.0f);
 	CapsuleComp->SetCapsuleRadius(200.0f);
 	CapsuleComp->SetGenerateOverlapEvents(true);
+	RootComponent = mesh;
+	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
 	
 	LoadMesh();
 }
@@ -55,8 +55,7 @@ void AElf::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AElf::LoadMesh()
 {
-	FString Directory = "SkeletalMesh'/Game/Characters/Elf/Elf_01_SK.Elf_01_SK'";
-	USkeletalMesh* MeshAsset = LoadObject<USkeletalMesh>(NULL, *Directory);
+	USkeletalMesh* MeshAsset = LoadObject<USkeletalMesh>(NULL, *FString("SkeletalMesh'/Game/Characters/Elf/Elf_01_SK.Elf_01_SK'"));
 	if (MeshAsset != nullptr)
 	{
 		mesh->SetSkeletalMesh(MeshAsset);

@@ -39,7 +39,7 @@ public:
 	void LoadMesh();
 
 	FVector Velocity = FVector::ZeroVector;
-	float SpeedModifier = 2500.0f;
+	float SpeedModifier = 250.0f;
 
 	void MoveX(float amount);
 	void MoveY(float amount);

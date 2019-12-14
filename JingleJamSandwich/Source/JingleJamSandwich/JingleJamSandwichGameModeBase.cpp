@@ -167,6 +167,21 @@ void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy, EMachineColour InColo
 	if (InToy && InToy->IsValidLowLevel())
 	{
 		InToy->colour = InColour;
+		switch (InColour)
+		{
+		case eRed:
+			break;
+		case eBlue:
+			break;
+		case eGreen:
+			break;
+		case eYellow:
+			break;
+		case eColourMax:
+			break;
+		default:
+			break;
+		}
 	}
 }
 

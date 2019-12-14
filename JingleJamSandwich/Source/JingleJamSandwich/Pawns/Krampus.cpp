@@ -13,12 +13,11 @@ AKrampus::AKrampus()
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	SetRootComponent(mesh);
-	//CapsuleComp->AttachToComponent(RootComponent);
 	CapsuleComp->SetCapsuleHalfHeight(500.0f);
 	CapsuleComp->SetCapsuleRadius(200.0f);
 	CapsuleComp->SetGenerateOverlapEvents(true);
-	//mesh->SetupAttachment(RootComponent);
+	RootComponent = mesh;
+	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
 	LoadMesh();
 }
 
@@ -58,18 +57,6 @@ void AKrampus::LoadMesh()
 	{
 		mesh->SetSkeletalMesh(MeshAsset);
 	}
-	//Load skeleton
-	//USkeleton* Skeleton = LoadObject<USkeleton>(NULL, *FString("Skeleton'/Game/Characters/Krampus/Krampus_01_SK_Skeleton.Krampus_01_SK_Skeleton'"));
-	//if (Skeleton != nullptr)
-	//{
-	//	skeleton = Skeleton;
-	//}
-	////load physics asset
-	//UPhysicsAsset* PhysicsAsset = LoadObject<UPhysicsAsset>(NULL, *FString("PhysicsAsset'/Game/Characters/Krampus/Krampus_01_SK_PhysicsAsset.Krampus_01_SK_PhysicsAsset'"));
-	//if (PhysicsAsset != nullptr)
-	//{
-	//	physicsAsset = PhysicsAsset;
-	//}
 }
 
 void AKrampus::MoveX(float amount)
