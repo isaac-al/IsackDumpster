@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "Toy.generated.h"
+#include "GameFramework/Pawn.h"
+#include "Krampus.generated.h"
 
 UCLASS()
-class JINGLEJAMSANDWICH_API AToy : public AActor
+class JINGLEJAMSANDWICH_API AKrampus : public APawn
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AToy();
+
+public:
+	// Sets default values for this pawn's properties
+	AKrampus();
 
 protected:
 	// Called when the game starts or when spawned
@@ -22,11 +22,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void RandomiseToy();
 
-	void LoadMesh(FString MeshName);
-
-	UStaticMeshComponent* mesh;
-	FString materialType;
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };
