@@ -7,17 +7,13 @@
 #include "JingleJamSandwichGameModeBase.generated.h"
 
 class AToy;
+class AElf;
+class AKrampus;
 
 #define GAME_TIME 200.0f
 #define ELF_HEALTH_MAX 3
 #define ELF_LIVES_MAX 3
 #define NUM_MACHINES 4
-
-struct FToyItem
-{
-	int32 ItemType = -1;
-	EMachineColour colour = eColourMax;
-}
 
 enum EState
 {
@@ -36,6 +32,12 @@ enum EMachineColour
 	eGreen,
 	eYellow,
 	eColourMax
+};
+
+struct FToyItem
+{
+	int32 ItemType = -1;
+	EMachineColour colour = eColourMax;
 };
 
 struct FMachine
@@ -61,8 +63,10 @@ public:
 
 	AJingleJamSandwichGameModeBase();
 
-	EState GameState;
+	AElf* Elf; 
+	AKrampus* Krampus;
 
+	EState GameState;
 	TArray<FToyItem> ItemList;
 	
 	UPROPERTY(BlueprintReadOnly)
@@ -74,6 +78,7 @@ public:
 	FMachine Machines[NUM_MACHINES];
 	float DeltaTime = 0.0f;
 	float GameTimer = GAME_TIME;
+	FVector ElfStart = FVector(-1900.0f, 1540.0f, -9.999786f);
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
@@ -97,10 +102,9 @@ public:
 	void MakeList();
 	void PaintToy(AToy* InToy, EMachineColour InColour);
 	void DeliverToy(AToy* InToy);
-
+	void DestroyToy(AToy* InToy);
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenPauseThanks = false;
-
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenMainThanks = false;
 

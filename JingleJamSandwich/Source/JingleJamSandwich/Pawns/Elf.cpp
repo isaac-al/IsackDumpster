@@ -3,15 +3,22 @@
 
 #include "Elf.h"
 #include "Components/InputComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Toy/Toy.h"
+#include "JingleJamSandwichGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 AElf::AElf()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-
-	SetRootComponent(mesh);
-
+	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	SetRootComponent(CapsuleComp);
+	CapsuleComp->SetCapsuleHalfHeight(500.0f);
+	CapsuleComp->SetCapsuleRadius(200.0f);
+	CapsuleComp->SetGenerateOverlapEvents(true);
 	LoadMesh();
 }
 
@@ -19,7 +26,7 @@ AElf::AElf()
 void AElf::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AElf::OnOverlapBegin);
 }
 
 // Called every frame
@@ -33,7 +40,6 @@ void AElf::Tick(float DeltaTime)
 		FVector NewLocation = GetActorLocation() + (Velocity * DeltaTime);
 		SetActorLocation(NewLocation);
 	}
-
 }
 
 void AElf::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -65,3 +71,40 @@ void AElf::MoveY(float amount)
 	Velocity.Y = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
 }
 
+void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	FString triggerName = FString(*OtherActor->GetName());
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
+
+	FString LHS = "";
+	FString RHS = "";
+
+	triggerName.Split("_", &LHS, &RHS);
+
+	if (RHS.Contains("GREEN"))
+	{
+		gamemode->PaintToy(CurrentToy, EMachineColour::eGreen);
+	}
+	else if (RHS.Contains("RED"))
+	{
+		gamemode->PaintToy(CurrentToy, EMachineColour::eRed);
+	}
+	else if (RHS.Contains("BLUE"))
+	{
+		gamemode->PaintToy(CurrentToy, EMachineColour::eBlue);
+	}
+	else if (RHS.Contains("YELLOW"))
+	{
+		gamemode->PaintToy(CurrentToy, EMachineColour::eYellow);
+	}
+	else if (RHS.Contains("DELIVER"))
+	{
+		gamemode->DeliverToy(CurrentToy);
+	}
+	else if (RHS.Contains("TRASH"))
+	{
+		gamemode->DestroyToy(CurrentToy);
+	}
+}

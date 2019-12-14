@@ -33,7 +33,7 @@ void AJinglePlayerController::ActionReleased()
 
 	if (gamemode && gamemode->GameState == ePlaying)
 	{
-
+		gamemode->DamageElf();
 	}
 }
 

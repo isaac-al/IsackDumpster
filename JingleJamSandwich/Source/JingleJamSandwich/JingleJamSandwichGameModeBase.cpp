@@ -5,6 +5,7 @@
 #include <Engine/Engine.h>
 #include "JinglePlayerController.h"
 #include "Toy/Toy.h"
+#include "Pawns/Elf.h"
 #include <Kismet/GameplayStatics.h>
 #include "Blueprint/UserWidget.h"
 #include <WidgetBlueprintLibrary.h>
@@ -25,12 +26,9 @@ void AJingleJamSandwichGameModeBase::StartGame()
 	TArray<AActor*> elves;
 	TArray<AActor*> krampai;
 
-	TSubclassOf<AJinglePlayerController> jingleControllers;
-	TSubclassOf<APawn> elf;
-	TSubclassOf<APawn> krampus;
-
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElf::StaticClass(), elves);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AKrampus::StaticClass(), krampai);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -46,7 +44,9 @@ void AJingleJamSandwichGameModeBase::StartGame()
 	}
 	GameState = ePlaying;
 
-	AElf* Elf = Cast<AElf>(elves[0]);
+	Elf = Cast<AElf>(elves[0]);
+	Krampus = Cast<AKrampus>(krampai[0]);
+
 	AJinglePlayerController* elfPC = Cast<AJinglePlayerController>(controllers[0]);
 
 	elfPC->Possess(Elf);
@@ -55,6 +55,7 @@ void AJingleJamSandwichGameModeBase::StartGame()
 	bPleaseOpenMainThanks = false;
 	bPleaseOpenGameOverThanks = false;
 	// TODO: Display HUD
+	Reset();
 }
 
 void AJingleJamSandwichGameModeBase::Pause()
@@ -169,13 +170,16 @@ void AJingleJamSandwichGameModeBase::MakeList()
 void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy, EMachineColour InColour)
 {
 	// TODO: set mesh colour
-	InToy->colour = InColour;
+	if (InToy && InToy->IsValidLowLevel())
+	{
+		InToy->colour = InColour;
+	}
 }
 
 void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 {
 	bool validToy = false;
-
+	if (!InToy) return;
 	int32 itemType = InToy->itemType;
 	EMachineColour toyColour = InToy->colour;
 
@@ -193,6 +197,14 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 		return;
 
 	InToy->BeginDestroy();
+}
+
+void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
+{
+	if (InToy && InToy->IsValidLowLevel())
+	{
+		InToy->BeginDestroy();
+	}
 }
 
 void AJingleJamSandwichGameModeBase::BeginPlay()
@@ -286,7 +298,7 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 
 	for (int item = 0; item < ItemList.Num(); ++item)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, FString("Item: " + FString::FromInt(ItemList[item])));
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, FString("Item: " + FString::FromInt(ItemList[item].ItemType)));
 	}
 }
 
@@ -313,5 +325,8 @@ void AJingleJamSandwichGameModeBase::KillElf()
 	else
 	{
 		// Respawn elf at starting point
+		Elf->SetActorLocation(ElfStart);
+		ElfHealth = ELF_HEALTH_MAX;
+		// reset rotation
 	}
 }
