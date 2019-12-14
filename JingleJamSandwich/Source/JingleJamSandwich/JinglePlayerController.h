@@ -27,6 +27,8 @@ public:
 	void DropReleased();
 	void PauseReleased();
 
+	void KrampusActionReleased();
+
 	void KrampusMoveX(float amount);
 	void KrampusMoveY(float amount);
 	void ElfMoveX(float amount);

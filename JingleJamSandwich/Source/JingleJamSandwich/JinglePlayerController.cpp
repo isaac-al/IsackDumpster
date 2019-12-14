@@ -35,6 +35,7 @@ void AJinglePlayerController::SetupInputComponent()
  	}
 	
 	InputComponent->BindAction("Action", EInputEvent::IE_Released, this, &AJinglePlayerController::ActionReleased);
+	InputComponent->BindAction("KrampusAction", EInputEvent::IE_Released, this, &AJinglePlayerController::KrampusActionReleased);
 	InputComponent->BindAction("Drop", EInputEvent::IE_Released, this, &AJinglePlayerController::DropReleased);
 	InputComponent->BindAction("Pause", EInputEvent::IE_Released, this, &AJinglePlayerController::PauseReleased);
 	//called before begin play.
@@ -91,6 +92,20 @@ void AJinglePlayerController::PauseReleased()
 			gamemode->GameState = ePlaying;
 			gamemode->bPleaseOpenPauseThanks = false;
 		}
+	}
+}
+
+void AJinglePlayerController::KrampusActionReleased()
+{
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	
+	if (Krampus->bElfOverlap)
+	{
+		gamemode->DamageElf();
+	}
+	else if (Krampus->MachineOverlap < (int32)EMachineColour::eColourMax)
+	{
+		gamemode->BreakMachine((EMachineColour)Krampus->MachineOverlap);
 	}
 }
 

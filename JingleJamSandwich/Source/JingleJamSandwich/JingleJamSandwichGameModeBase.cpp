@@ -143,9 +143,6 @@ void AJingleJamSandwichGameModeBase::DamageElf()
 	{
 		KillElf();
 	}
-	else
-	{
-	}	
 }
 
 void AJingleJamSandwichGameModeBase::MakeList()
@@ -206,6 +203,22 @@ void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
 	if (InToy && InToy->IsValidLowLevel())
 	{
 		InToy->BeginDestroy();
+	}
+}
+
+void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour)
+{
+	Machines[(int32)InMachineColour].Broken = true;
+}
+
+void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColour)
+{
+	Machines[(int32)InMachineColour].RepairTime += DeltaTime;
+
+	if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
+	{
+		Machines[(int32)InMachineColour].RepairTime = 0;
+		Machines[(int32)InMachineColour].Broken = false;
 	}
 }
 
@@ -286,7 +299,7 @@ void AJingleJamSandwichGameModeBase::UpdateLossState()
 void AJingleJamSandwichGameModeBase::UpdateGame()
 {
 	GameTimer -= DeltaTime;
-
+	ElfHealthNormal = ((float)ElfHealth / (float)ELF_HEALTH_MAX);
 	bShowHUD = true;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Time left: " + FString::SanitizeFloat(GameTimer)));
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Health left: " + FString::FromInt(ElfHealth)));
@@ -319,6 +332,7 @@ void AJingleJamSandwichGameModeBase::Reset()
 void AJingleJamSandwichGameModeBase::KillElf()
 {
 	--ElfLives;
+	ElfHealth = ELF_HEALTH_MAX;
 
 	if (ElfLives <= 0)
 	{
@@ -327,9 +341,11 @@ void AJingleJamSandwichGameModeBase::KillElf()
 	else
 	{
 		// Respawn elf at starting point
-		Elf->SetActorLocation(ElfStart);
-		ElfHealth = ELF_HEALTH_MAX;
-		Score = 0;
+		if (Elf)
+		{
+			Elf->SetActorLocation(ElfStart);
+			Score = 0;
+		}
 		// reset rotation
 	}
 }

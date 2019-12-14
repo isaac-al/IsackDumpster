@@ -4,6 +4,7 @@
 #include "Krampus.h"
 #include "Components/InputComponent.h"
 #include "JingleJamSandwichGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AKrampus::AKrampus()
@@ -61,4 +62,44 @@ void AKrampus::MoveX(float amount)
 void AKrampus::MoveY(float amount)
 {
 	Velocity.Y = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
+}
+
+void AKrampus::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	FString triggerName = FString(*OtherActor->GetName());
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
+
+	FString LHS = "";
+	FString RHS = "";
+
+	triggerName.Split("_", &LHS, &RHS);
+
+	if (RHS.Contains("GREEN"))
+	{
+		MachineOverlap = (int32)EMachineColour::eGreen;
+	}
+	else if (RHS.Contains("RED"))
+	{
+		MachineOverlap = (int32)EMachineColour::eRed;
+	}
+	else if (RHS.Contains("BLUE"))
+	{
+		MachineOverlap = (int32)EMachineColour::eBlue;
+	}
+	else if (RHS.Contains("YELLOW"))
+	{
+		MachineOverlap = (int32)EMachineColour::eYellow;
+	}
+	else if (RHS.Contains("ELF"))
+	{
+		bElfOverlap = true;
+	}
+}
+
+void AKrampus::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bElfOverlap = false;
+	MachineOverlap = (int32)EMachineColour::eColourMax;
 }
