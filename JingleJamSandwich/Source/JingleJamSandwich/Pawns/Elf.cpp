@@ -13,12 +13,14 @@ AElf::AElf()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	SetRootComponent(CapsuleComp);
+	SetRootComponent(mesh);
+	//CapsuleComp->AttachToComponent(RootComponent);
 	CapsuleComp->SetCapsuleHalfHeight(500.0f);
 	CapsuleComp->SetCapsuleRadius(200.0f);
 	CapsuleComp->SetGenerateOverlapEvents(true);
+	
 	LoadMesh();
 }
 
@@ -53,11 +55,11 @@ void AElf::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AElf::LoadMesh()
 {
-	FString Directory = "StaticMesh'/Game/Meshes/Elf.Elf'";
-	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(NULL, *Directory);
+	FString Directory = "SkeletalMesh'/Game/Characters/Elf/Elf_01_SK.Elf_01_SK'";
+	USkeletalMesh* MeshAsset = LoadObject<USkeletalMesh>(NULL, *Directory);
 	if (MeshAsset != nullptr)
 	{
-		mesh->SetStaticMesh(MeshAsset);
+		mesh->SetSkeletalMesh(MeshAsset);
 	}
 }
 

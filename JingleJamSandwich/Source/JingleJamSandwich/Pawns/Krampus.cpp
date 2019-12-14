@@ -3,14 +3,22 @@
 
 #include "Krampus.h"
 #include "Components/InputComponent.h"
+#include "Components/CapsuleComponent.h"
+#include <Runtime\Engine\Classes\Engine\SkeletalMesh.h>
 
 // Sets default values
 AKrampus::AKrampus()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	RootComponent = mesh;
+	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	SetRootComponent(mesh);
+	//CapsuleComp->AttachToComponent(RootComponent);
+	CapsuleComp->SetCapsuleHalfHeight(500.0f);
+	CapsuleComp->SetCapsuleRadius(200.0f);
+	CapsuleComp->SetGenerateOverlapEvents(true);
+	//mesh->SetupAttachment(RootComponent);
 	LoadMesh();
 }
 
@@ -44,12 +52,24 @@ void AKrampus::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AKrampus::LoadMesh()
 {
-	FString Directory = "StaticMesh'/Game/Meshes/Krampus.Krampus'";
-	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(NULL, *Directory);
+	//load Skeletal mesh
+	USkeletalMesh* MeshAsset = LoadObject<USkeletalMesh>(NULL, *FString("SkeletalMesh'/Game/Characters/Krampus/Krampus_01_SK.Krampus_01_SK'"));
 	if (MeshAsset != nullptr)
 	{
-		mesh->SetStaticMesh(MeshAsset);
+		mesh->SetSkeletalMesh(MeshAsset);
 	}
+	//Load skeleton
+	//USkeleton* Skeleton = LoadObject<USkeleton>(NULL, *FString("Skeleton'/Game/Characters/Krampus/Krampus_01_SK_Skeleton.Krampus_01_SK_Skeleton'"));
+	//if (Skeleton != nullptr)
+	//{
+	//	skeleton = Skeleton;
+	//}
+	////load physics asset
+	//UPhysicsAsset* PhysicsAsset = LoadObject<UPhysicsAsset>(NULL, *FString("PhysicsAsset'/Game/Characters/Krampus/Krampus_01_SK_PhysicsAsset.Krampus_01_SK_PhysicsAsset'"));
+	//if (PhysicsAsset != nullptr)
+	//{
+	//	physicsAsset = PhysicsAsset;
+	//}
 }
 
 void AKrampus::MoveX(float amount)

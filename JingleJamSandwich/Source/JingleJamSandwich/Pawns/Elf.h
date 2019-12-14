@@ -30,7 +30,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(BlueprintReadWrite)
-	UStaticMeshComponent* mesh;
+	USkeletalMeshComponent* mesh;
 
 	UPROPERTY(BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
@@ -39,7 +39,7 @@ public:
 	void LoadMesh();
 
 	FVector Velocity = FVector::ZeroVector;
-	float SpeedModifier = 250.0f;
+	float SpeedModifier = 2500.0f;
 
 	void MoveX(float amount);
 	void MoveY(float amount);
