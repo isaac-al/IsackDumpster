@@ -161,8 +161,8 @@ void AJingleJamSandwichGameModeBase::MakeList()
 	for (int32 i = 0; i < 4; ++i)
 	{
 		FToyItem item;
-		item.ItemType = FMath::RandRange(0, 5);
-		item.colour = (EMachineColour)FMath::RandRange(0, 4);
+		item.ItemType = FMath::RandRange(1, 8);
+		item.colour = (EMachineColour)FMath::RandRange(0, 3);
 		ItemList.Add(item);
 	}
 }
@@ -189,12 +189,20 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 			toyColour == ItemList[i].colour)
 		{
 			ItemList.RemoveAt(i);
+			validToy = true;
+			Score += DELIVER_POINTS;
 			break;
 		}
 	}
 
 	if (!validToy)
 		return;
+
+	if (ItemList.Num() <= 0)
+	{
+		Score += LIST_CLEAR_POINTS;
+		MakeList();
+	}
 
 	InToy->BeginDestroy();
 }
@@ -327,6 +335,7 @@ void AJingleJamSandwichGameModeBase::KillElf()
 		// Respawn elf at starting point
 		Elf->SetActorLocation(ElfStart);
 		ElfHealth = ELF_HEALTH_MAX;
+		Score = 0;
 		// reset rotation
 	}
 }

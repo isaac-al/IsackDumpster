@@ -74,6 +74,5 @@ void AJinglePlayerController::PauseReleased()
 			gamemode->GameState = ePlaying;
 			gamemode->bPleaseOpenPauseThanks = false;
 		}
-
 	}
 }

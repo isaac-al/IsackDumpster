@@ -3,6 +3,7 @@
 
 #include "Krampus.h"
 #include "Components/InputComponent.h"
+#include "JingleJamSandwichGameModeBase.h"
 
 // Sets default values
 AKrampus::AKrampus()

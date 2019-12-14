@@ -14,6 +14,8 @@ class AKrampus;
 #define ELF_HEALTH_MAX 3
 #define ELF_LIVES_MAX 3
 #define NUM_MACHINES 4
+#define DELIVER_POINTS 50
+#define LIST_CLEAR_POINTS 100
 
 enum EState
 {
@@ -47,7 +49,6 @@ struct FMachine
 	bool Broken = false;
 };
 
-
 /**
  * 
  */
@@ -78,6 +79,8 @@ public:
 	FMachine Machines[NUM_MACHINES];
 	float DeltaTime = 0.0f;
 	float GameTimer = GAME_TIME;
+
+	int32 Score = 0;
 	FVector ElfStart = FVector(-1900.0f, 1540.0f, -9.999786f);
 
 	UFUNCTION(BlueprintCallable)
