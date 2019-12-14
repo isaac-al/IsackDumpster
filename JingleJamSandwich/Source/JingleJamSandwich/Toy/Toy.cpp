@@ -52,6 +52,8 @@ void AToy::RandomiseToy()
 	default:
 		break;
 	}
+
+	itemType = chosenToy;
 }
 
 void AToy::LoadMesh(FString MeshName)

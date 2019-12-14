@@ -8,10 +8,16 @@
 
 class AToy;
 
-#define GAME_TIME 10.0f
+#define GAME_TIME 200.0f
 #define ELF_HEALTH_MAX 3
 #define ELF_LIVES_MAX 3
 #define NUM_MACHINES 4
+
+struct FToyItem
+{
+	int32 ItemType = -1;
+	EMachineColour colour = eColourMax;
+}
 
 enum EState
 {
@@ -56,6 +62,8 @@ public:
 	AJingleJamSandwichGameModeBase();
 
 	EState GameState;
+
+	TArray<FToyItem> ItemList;
 	
 	UPROPERTY(BlueprintReadOnly)
 	int32 ElfHealth = ELF_HEALTH_MAX;
@@ -83,11 +91,12 @@ public:
 	void Restart();
 
 	UFUNCTION(BlueprintCallable)
-		void SpawnToy();
+	void SpawnToy();
 
 	void DamageElf();
-
-	void PaintToy(AToy* InToy);
+	void MakeList();
+	void PaintToy(AToy* InToy, EMachineColour InColour);
+	void DeliverToy(AToy* InToy);
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenPauseThanks = false;

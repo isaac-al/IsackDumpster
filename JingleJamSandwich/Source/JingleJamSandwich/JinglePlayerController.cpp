@@ -33,8 +33,7 @@ void AJinglePlayerController::ActionReleased()
 
 	if (gamemode && gamemode->GameState == ePlaying)
 	{
-		gamemode->GameState = eLost;
-		gamemode->bPleaseOpenGameOverThanks = true;
+
 	}
 }
 
@@ -54,7 +53,7 @@ void AJinglePlayerController::DropReleased()
 		}
 		else if (gamemode->GameState == ePlaying)
 		{
-			gamemode->DamageElf();
+			gamemode->MakeList();
 		}		
 	}
 }

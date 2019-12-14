@@ -28,5 +28,6 @@ public:
 
 	UStaticMeshComponent* mesh;
 	FString materialType;
-
+	int32 itemType = 0;
+	EMachineColour colour = eColourMax;
 };

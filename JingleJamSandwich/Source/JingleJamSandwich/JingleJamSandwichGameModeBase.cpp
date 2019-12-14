@@ -139,9 +139,46 @@ void AJingleJamSandwichGameModeBase::DamageElf()
 	}	
 }
 
-void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy)
+void AJingleJamSandwichGameModeBase::MakeList()
+{
+	ItemList.Empty();
+
+	for (int32 i = 0; i < 4; ++i)
+	{
+		FToyItem item;
+		item.ItemType = FMath::RandRange(0, 5);
+		item.colour = (EMachineColour)FMath::RandRange(0, 4);
+		ItemList.Add(item);
+	}
+}
+
+void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy, EMachineColour InColour)
 {
 	// TODO: set mesh colour
+	InToy->colour = InColour;
+}
+
+void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
+{
+	bool validToy = false;
+
+	int32 itemType = InToy->itemType;
+	EMachineColour toyColour = InToy->colour;
+
+	for (int32 i = 0; i < ItemList.Num(); ++i)
+	{
+		if (itemType == ItemList[i].ItemType &&
+			toyColour == ItemList[i].colour)
+		{
+			ItemList.RemoveAt(i);
+			break;
+		}
+	}
+
+	if (!validToy)
+		return;
+
+	InToy->BeginDestroy();
 }
 
 void AJingleJamSandwichGameModeBase::BeginPlay()
@@ -231,6 +268,11 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 		// Game over biiiitch
 		GameState = eWon;
 		bPleaseOpenGameOverThanks = true;
+	}
+
+	for (int item = 0; item < ItemList.Num(); ++item)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, FString("Item: " + FString::FromInt(ItemList[item])));
 	}
 }
 
