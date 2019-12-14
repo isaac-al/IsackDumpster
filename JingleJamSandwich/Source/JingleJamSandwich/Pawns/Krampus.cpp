@@ -2,6 +2,7 @@
 
 
 #include "Krampus.h"
+#include "Components/InputComponent.h"
 
 // Sets default values
 AKrampus::AKrampus()
@@ -23,14 +24,21 @@ void AKrampus::BeginPlay()
 void AKrampus::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	//if we have movement
+	if (!Velocity.IsZero())
+	{
+		FVector NewLocation = GetActorLocation() + (Velocity * DeltaTime);
+		SetActorLocation(NewLocation);
+	}
 }
 
 // Called to bind functionality to input
 void AKrampus::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::SetupPlayerInputComponent(InputComponent);
 
+	InputComponent->BindAxis("Krampus_X", this, &AKrampus::MoveX);
+	InputComponent->BindAxis("Krampus_Y", this, &AKrampus::MoveY);
 }
 
 void AKrampus::LoadMesh()
@@ -41,5 +49,15 @@ void AKrampus::LoadMesh()
 	{
 		mesh->SetStaticMesh(MeshAsset);
 	}
+}
+
+void AKrampus::MoveX(float amount)
+{
+	Velocity.X = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
+}
+
+void AKrampus::MoveY(float amount)
+{
+	Velocity.Y = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
 }
 
