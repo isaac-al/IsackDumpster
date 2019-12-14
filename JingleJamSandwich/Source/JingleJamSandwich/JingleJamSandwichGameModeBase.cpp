@@ -12,10 +12,12 @@
 #include <GameFramework/PlayerController.h>
 #include <JingleJamSandwich\Pawns\Elf.h>
 #include <JingleJamSandwich\Pawns\Krampus.h>
+#include <DefaultPawnOverride.h>
 
 AJingleJamSandwichGameModeBase::AJingleJamSandwichGameModeBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	DefaultPawnClass = ADefaultPawnOverride::StaticClass();
 	PlayerControllerClass = AJinglePlayerController::StaticClass();
 }
 
