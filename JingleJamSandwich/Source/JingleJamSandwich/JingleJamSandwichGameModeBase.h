@@ -6,7 +6,12 @@
 #include "GameFramework/GameModeBase.h"
 #include "JingleJamSandwichGameModeBase.generated.h"
 
+class AToy;
+
 #define GAME_TIME 10.0f
+#define ELF_HEALTH_MAX 3
+#define ELF_LIVES_MAX 3
+#define NUM_MACHINES 4
 
 enum EState
 {
@@ -16,6 +21,28 @@ enum EState
 	eWon,
 	eLost
 };
+
+enum EMachineColour
+{
+	eRed,
+	eBlue,
+	eGreen,
+	eYellow
+};
+
+struct FElfStats
+{
+	int32 Health = ELF_HEALTH_MAX;
+	int32 Lives = ELF_LIVES_MAX;
+};
+
+struct FMachine
+{
+	EMachineColour Colour;
+	float RepairTime = 0.0f;
+	bool Broken = false;
+};
+
 
 /**
  * 
@@ -31,11 +58,11 @@ protected:
 public:
 
 	AJingleJamSandwichGameModeBase();
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "StateMachine")
-	EState GameState;
-	
-	float DeltaTime = 0.0f;
 
+	EState GameState;
+	FElfStats ElfStats;
+	FMachine Machines[NUM_MACHINES];
+	float DeltaTime = 0.0f;
 	float GameTimer = GAME_TIME;
 
 	UFUNCTION(BlueprintCallable)
@@ -56,6 +83,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SpawnToy();
 
+	void PaintToy(AToy* InToy);
+
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenPauseThanks = false;
 
@@ -65,7 +94,11 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenGameOverThanks = false;
 
+	UPROPERTY(BlueprintReadWrite)
+	bool bShowHUD = false;
+
 private:
+
 	void UpdateMainMenu();
 	void UpdatePauseMenu();
 	void UpdateWonState();

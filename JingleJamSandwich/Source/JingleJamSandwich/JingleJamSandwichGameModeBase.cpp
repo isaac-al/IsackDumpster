@@ -126,6 +126,11 @@ void AJingleJamSandwichGameModeBase::SpawnToy()
 	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
+void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy)
+{
+	// TODO: set mesh colour
+}
+
 void AJingleJamSandwichGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -172,23 +177,28 @@ void AJingleJamSandwichGameModeBase::Tick(float DeltaSeconds)
 
 void AJingleJamSandwichGameModeBase::UpdateMainMenu()
 {
+	bShowHUD = false;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("MAIN MENU"));
 
 }
 
 void AJingleJamSandwichGameModeBase::UpdatePauseMenu()
 {
+	bShowHUD = false;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("PAUSED"));
 }
 
 void AJingleJamSandwichGameModeBase::UpdateWonState()
 {
+	bShowHUD = false;
+
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("You wonned"));
 }
 
 void AJingleJamSandwichGameModeBase::UpdateLossState()
 {
+	bShowHUD = false;
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("YOU LOST MEGABITCH"));
 }
@@ -197,6 +207,7 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 {
 	GameTimer -= DeltaTime;
 
+	bShowHUD = true;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Time left: " + FString::SanitizeFloat(GameTimer)));
 
 	if (GameTimer <= 0.0f)
