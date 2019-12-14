@@ -4,6 +4,7 @@
 #include "JingleJamSandwichGameModeBase.h"
 #include <Engine/Engine.h>
 #include "JinglePlayerController.h"
+#include "Toy/Toy.h"
 #include <Kismet/GameplayStatics.h>
 #include "Blueprint/UserWidget.h"
 #include <WidgetBlueprintLibrary.h>
@@ -35,6 +36,7 @@ void AJingleJamSandwichGameModeBase::StartGame()
 		}
 	}
 	GameState = ePlaying;
+	SpawnToy();
 
 	bPleaseOpenMainThanks = false;
 	bPleaseOpenGameOverThanks = false;
@@ -117,6 +119,11 @@ void AJingleJamSandwichGameModeBase::Restart()
 	bPleaseOpenPauseThanks = false;
 	bPleaseOpenGameOverThanks = false;
 	GameState = ePlaying;
+}
+
+void AJingleJamSandwichGameModeBase::SpawnToy()
+{
+	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
 void AJingleJamSandwichGameModeBase::BeginPlay()

@@ -53,6 +53,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Restart();
 
+	UFUNCTION(BlueprintCallable)
+		void SpawnToy();
+
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenPauseThanks = false;
 
@@ -61,7 +64,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenGameOverThanks = false;
-	
+
 private:
 	void UpdateMainMenu();
 	void UpdatePauseMenu();
