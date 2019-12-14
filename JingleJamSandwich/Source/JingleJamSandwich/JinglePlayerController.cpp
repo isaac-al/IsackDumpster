@@ -52,7 +52,10 @@ void AJinglePlayerController::DropReleased()
 		{
 			gamemode->GameState = eMainMenu;
 		}
-		
+		else if (gamemode->GameState == ePlaying)
+		{
+			gamemode->DamageElf();
+		}		
 	}
 }
 
