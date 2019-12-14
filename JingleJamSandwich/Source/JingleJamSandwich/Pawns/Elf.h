@@ -33,7 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadMesh();
 
-	FVector Velocity;
+	FVector Velocity = FVector::ZeroVector;
 	float SpeedModifier = 250.0f;
 
 	void MoveX(float amount);

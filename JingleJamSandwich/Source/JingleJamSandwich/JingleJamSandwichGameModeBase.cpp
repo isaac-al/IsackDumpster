@@ -22,15 +22,10 @@ void AJingleJamSandwichGameModeBase::StartGame()
 {
 	// iterate through players
 	TArray<AActor*> controllers;
-	TArray<AActor*> elves;
-	TArray<AActor*> krampai;
 
 	TSubclassOf<AJinglePlayerController> jingleControllers;
-	TSubclassOf<APawn> elf;
-	TSubclassOf<APawn> krampus;
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElf::StaticClass(), elves);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -46,10 +41,6 @@ void AJingleJamSandwichGameModeBase::StartGame()
 	}
 	GameState = ePlaying;
 
-	AElf* Elf = Cast<AElf>(elves[0]);
-	AJinglePlayerController* elfPC = Cast<AJinglePlayerController>(controllers[0]);
-
-	elfPC->Possess(Elf);
 	SpawnToy();
 
 	bPleaseOpenMainThanks = false;

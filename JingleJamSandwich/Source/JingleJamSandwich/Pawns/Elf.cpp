@@ -9,7 +9,6 @@ AElf::AElf()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-
 	SetRootComponent(mesh);
 
 	LoadMesh();
@@ -26,7 +25,7 @@ void AElf::BeginPlay()
 void AElf::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("ELF Velocity"));
 	//if we have movement
 	if (!Velocity.IsZero())
 	{
