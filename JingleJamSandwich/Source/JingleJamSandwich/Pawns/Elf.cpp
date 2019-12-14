@@ -86,26 +86,37 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 	if (RHS.Contains("GREEN"))
 	{
+		MachineOverlap = (int32)EMachineColour::eGreen;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eGreen);
 	}
 	else if (RHS.Contains("RED"))
 	{
+		MachineOverlap = (int32)EMachineColour::eRed;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eRed);
 	}
 	else if (RHS.Contains("BLUE"))
 	{
+		MachineOverlap = (int32)EMachineColour::eBlue;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eBlue);
 	}
 	else if (RHS.Contains("YELLOW"))
 	{
+		MachineOverlap = (int32)EMachineColour::eYellow;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eYellow);
 	}
 	else if (RHS.Contains("DELIVER"))
 	{
+		bDeliveryOverlap = true;
 		gamemode->DeliverToy(CurrentToy);
 	}
 	else if (RHS.Contains("TRASH"))
 	{
 		gamemode->DestroyToy(CurrentToy);
 	}
+}
+
+void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	MachineOverlap = (int32)EMachineColour::eColourMax;
+	bDeliveryOverlap = false;
 }

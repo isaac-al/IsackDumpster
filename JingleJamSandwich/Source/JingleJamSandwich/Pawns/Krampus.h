@@ -39,7 +39,14 @@ public:
 
 	FVector Velocity;
 	float SpeedModifier = 250.0f;
-
+	int32 MachineOverlap = 4;
+	bool bElfOverlap = false;
 	void MoveX(float amount);
 	void MoveY(float amount);
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

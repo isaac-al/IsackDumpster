@@ -4,6 +4,7 @@
 #include "Toy.h"
 #include <Engine/Engine.h>
 #include <ConstructorHelpers.h>
+#include "JingleJamSandwichGameModeBase.h"
 
 // Sets default values
 AToy::AToy()
