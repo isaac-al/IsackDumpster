@@ -7,8 +7,10 @@
 #include "JingleJamSandwichGameModeBase.generated.h"
 
 class AToy;
+class AElf;
+class AKrampus;
 
-#define GAME_TIME 10.0f
+#define GAME_TIME 200.0f
 #define ELF_HEALTH_MAX 3
 #define ELF_LIVES_MAX 3
 #define NUM_MACHINES 4
@@ -19,7 +21,8 @@ enum EState
 	ePlaying,
 	ePaused,
 	eWon,
-	eLost
+	eLost,
+	eStateMax
 };
 
 enum EMachineColour
@@ -27,13 +30,14 @@ enum EMachineColour
 	eRed,
 	eBlue,
 	eGreen,
-	eYellow
+	eYellow,
+	eColourMax
 };
 
-struct FElfStats
+struct FToyItem
 {
-	int32 Health = ELF_HEALTH_MAX;
-	int32 Lives = ELF_LIVES_MAX;
+	int32 ItemType = -1;
+	EMachineColour colour = eColourMax;
 };
 
 struct FMachine
@@ -59,11 +63,22 @@ public:
 
 	AJingleJamSandwichGameModeBase();
 
+	AElf* Elf; 
+	AKrampus* Krampus;
+
 	EState GameState;
-	FElfStats ElfStats;
+	TArray<FToyItem> ItemList;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int32 ElfHealth = ELF_HEALTH_MAX;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 ElfLives = ELF_LIVES_MAX;
+
 	FMachine Machines[NUM_MACHINES];
 	float DeltaTime = 0.0f;
 	float GameTimer = GAME_TIME;
+	FVector ElfStart = FVector(-1900.0f, 1540.0f, -9.999786f);
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
@@ -81,13 +96,15 @@ public:
 	void Restart();
 
 	UFUNCTION(BlueprintCallable)
-		void SpawnToy();
+	void SpawnToy();
 
-	void PaintToy(AToy* InToy);
-
+	void DamageElf();
+	void MakeList();
+	void PaintToy(AToy* InToy, EMachineColour InColour);
+	void DeliverToy(AToy* InToy);
+	void DestroyToy(AToy* InToy);
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenPauseThanks = false;
-
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenMainThanks = false;
 
@@ -105,4 +122,5 @@ private:
 	void UpdateLossState();
 	void UpdateGame();
 	void Reset();
+	void KillElf();
 };

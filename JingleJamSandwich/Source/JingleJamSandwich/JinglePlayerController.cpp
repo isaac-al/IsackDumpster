@@ -6,6 +6,8 @@
 #include <Kismet/GameplayStatics.h>
 #include <WidgetBlueprintLibrary.h>
 #include <UserWidget.h>
+#include <JingleJamSandwich\Pawns\Krampus.h>
+#include <JingleJamSandwich\Pawns\Elf.h>
 
 void AJinglePlayerController::BeginPlay()
 {
@@ -13,6 +15,16 @@ void AJinglePlayerController::BeginPlay()
 	input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	bShowMouseCursor = true;
 	SetInputMode(input);
+
+	TArray<AActor*> Krampai;
+	TSubclassOf<AKrampus> krampus;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AKrampus::StaticClass(), Krampai);
+	Krampus = Cast<AKrampus>(Krampai[0]);
+
+	TArray<AActor*> Elves;
+	TSubclassOf<AElf> elf;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElf::StaticClass(), Elves);
+	Elf = Cast<AElf>(Elves[0]);
 }
 
 void AJinglePlayerController::SetupInputComponent()
@@ -25,6 +37,11 @@ void AJinglePlayerController::SetupInputComponent()
 	InputComponent->BindAction("Action", EInputEvent::IE_Released, this, &AJinglePlayerController::ActionReleased);
 	InputComponent->BindAction("Drop", EInputEvent::IE_Released, this, &AJinglePlayerController::DropReleased);
 	InputComponent->BindAction("Pause", EInputEvent::IE_Released, this, &AJinglePlayerController::PauseReleased);
+	//called before begin play.
+	InputComponent->BindAxis("Krampus_X", this, &AJinglePlayerController::KrampusMoveX);
+	InputComponent->BindAxis("Krampus_Y", this, &AJinglePlayerController::KrampusMoveY);
+	InputComponent->BindAxis("Elf_X", this, &AJinglePlayerController::ElfMoveX);
+	InputComponent->BindAxis("Elf_Y", this, &AJinglePlayerController::ElfMoveY);
 }
 
 void AJinglePlayerController::ActionReleased()
@@ -33,8 +50,7 @@ void AJinglePlayerController::ActionReleased()
 
 	if (gamemode && gamemode->GameState == ePlaying)
 	{
-		gamemode->GameState = eLost;
-		gamemode->bPleaseOpenGameOverThanks = true;
+		gamemode->DamageElf();
 	}
 }
 
@@ -52,7 +68,10 @@ void AJinglePlayerController::DropReleased()
 		{
 			gamemode->GameState = eMainMenu;
 		}
-		
+		else if (gamemode->GameState == ePlaying)
+		{
+			gamemode->MakeList();
+		}		
 	}
 }
 
@@ -74,4 +93,24 @@ void AJinglePlayerController::PauseReleased()
 		}
 
 	}
+}
+
+void AJinglePlayerController::KrampusMoveX(float amount)
+{
+	Krampus->MoveX(amount);
+}
+
+void AJinglePlayerController::KrampusMoveY(float amount)
+{
+	Krampus->MoveY(amount);
+}
+
+void AJinglePlayerController::ElfMoveX(float amount)
+{
+	Elf->MoveX(amount);
+}
+
+void AJinglePlayerController::ElfMoveY(float amount)
+{
+	Elf->MoveY(amount);
 }
