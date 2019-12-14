@@ -126,6 +126,19 @@ void AJingleJamSandwichGameModeBase::SpawnToy()
 	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
+void AJingleJamSandwichGameModeBase::DamageElf()
+{
+	--ElfHealth;
+
+	if (ElfHealth <= 0)
+	{
+		KillElf();
+	}
+	else
+	{
+	}	
+}
+
 void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy)
 {
 	// TODO: set mesh colour
@@ -191,6 +204,7 @@ void AJingleJamSandwichGameModeBase::UpdatePauseMenu()
 void AJingleJamSandwichGameModeBase::UpdateWonState()
 {
 	bShowHUD = false;
+	bPleaseOpenGameOverThanks = true;
 
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("You wonned"));
@@ -199,6 +213,7 @@ void AJingleJamSandwichGameModeBase::UpdateWonState()
 void AJingleJamSandwichGameModeBase::UpdateLossState()
 {
 	bShowHUD = false;
+	bPleaseOpenGameOverThanks = true;
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("YOU LOST MEGABITCH"));
 }
@@ -209,6 +224,7 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 
 	bShowHUD = true;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Time left: " + FString::SanitizeFloat(GameTimer)));
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Health left: " + FString::FromInt(ElfHealth)));
 
 	if (GameTimer <= 0.0f)
 	{
@@ -221,4 +237,25 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 void AJingleJamSandwichGameModeBase::Reset()
 {
 	GameTimer = GAME_TIME;
+	ElfHealth = ELF_HEALTH_MAX;
+	ElfLives  = ELF_LIVES_MAX;
+
+	for (int32 i = 0; i < NUM_MACHINES; i++)
+	{
+		Machines[i] = FMachine();
+	}
+}
+
+void AJingleJamSandwichGameModeBase::KillElf()
+{
+	--ElfLives;
+
+	if (ElfLives <= 0)
+	{
+		GameState = eLost;
+	}
+	else
+	{
+		// Respawn elf at starting point
+	}
 }

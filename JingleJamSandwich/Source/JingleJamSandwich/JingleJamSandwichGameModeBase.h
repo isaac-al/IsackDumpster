@@ -19,7 +19,8 @@ enum EState
 	ePlaying,
 	ePaused,
 	eWon,
-	eLost
+	eLost,
+	eStateMax
 };
 
 enum EMachineColour
@@ -27,13 +28,8 @@ enum EMachineColour
 	eRed,
 	eBlue,
 	eGreen,
-	eYellow
-};
-
-struct FElfStats
-{
-	int32 Health = ELF_HEALTH_MAX;
-	int32 Lives = ELF_LIVES_MAX;
+	eYellow,
+	eColourMax
 };
 
 struct FMachine
@@ -60,7 +56,13 @@ public:
 	AJingleJamSandwichGameModeBase();
 
 	EState GameState;
-	FElfStats ElfStats;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int32 ElfHealth = ELF_HEALTH_MAX;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 ElfLives = ELF_LIVES_MAX;
+
 	FMachine Machines[NUM_MACHINES];
 	float DeltaTime = 0.0f;
 	float GameTimer = GAME_TIME;
@@ -82,6 +84,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void SpawnToy();
+
+	void DamageElf();
 
 	void PaintToy(AToy* InToy);
 
@@ -105,4 +109,5 @@ private:
 	void UpdateLossState();
 	void UpdateGame();
 	void Reset();
+	void KillElf();
 };
