@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "JingleJamSandwichGameModeBase.h"
 #include "Toy.generated.h"
 
 UCLASS()
@@ -28,5 +29,6 @@ public:
 
 	UStaticMeshComponent* mesh;
 	FString materialType;
-
+	int32 itemType = 0;
+	EMachineColour colour = eColourMax;
 };
