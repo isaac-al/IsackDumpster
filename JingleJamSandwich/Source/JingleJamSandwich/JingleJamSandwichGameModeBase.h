@@ -103,6 +103,9 @@ public:
 	void PaintToy(AToy* InToy, EMachineColour InColour);
 	void DeliverToy(AToy* InToy);
 	void DestroyToy(AToy* InToy);
+
+	void ChangeMaterial(FString MaterialName, AToy* InToy);
+
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenPauseThanks = false;
 	UPROPERTY(BlueprintReadWrite)

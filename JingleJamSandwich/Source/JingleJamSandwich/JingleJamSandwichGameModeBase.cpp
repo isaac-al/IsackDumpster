@@ -13,6 +13,7 @@
 #include <JingleJamSandwich\Pawns\Elf.h>
 #include <JingleJamSandwich\Pawns\Krampus.h>
 #include <DefaultPawnOverride.h>
+#include <Materials/MaterialInstance.h>
 
 AJingleJamSandwichGameModeBase::AJingleJamSandwichGameModeBase()
 {
@@ -42,6 +43,7 @@ void AJingleJamSandwichGameModeBase::StartGame()
 			pc->SetInputMode(input);
 		}
 	}
+
 	GameState = ePlaying;
 
 	SpawnToy();
@@ -170,14 +172,16 @@ void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy, EMachineColour InColo
 		switch (InColour)
 		{
 		case eRed:
+			ChangeMaterial("Red", InToy);
 			break;
 		case eBlue:
+			ChangeMaterial("Blue", InToy);
 			break;
 		case eGreen:
+			ChangeMaterial("Green", InToy);
 			break;
 		case eYellow:
-			break;
-		case eColourMax:
+			ChangeMaterial("Yellow", InToy);
 			break;
 		default:
 			break;
@@ -213,6 +217,15 @@ void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
 	if (InToy && InToy->IsValidLowLevel())
 	{
 		InToy->BeginDestroy();
+	}
+}
+
+void AJingleJamSandwichGameModeBase::ChangeMaterial(FString MaterialName, AToy* InToy)
+{
+	UMaterialInstance* MaterialAsset = LoadObject<UMaterialInstance>(NULL, *FString("MaterialInstanceConstant'/Game/Materials/" + MaterialName + "." + MaterialName + "'"));
+	if (MaterialAsset != nullptr)
+	{
+		InToy->mesh->SetMaterial(0, MaterialAsset);
 	}
 }
 
