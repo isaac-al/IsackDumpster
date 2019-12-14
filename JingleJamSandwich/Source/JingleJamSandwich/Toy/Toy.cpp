@@ -4,6 +4,7 @@
 #include "Toy.h"
 #include <Engine/Engine.h>
 #include <ConstructorHelpers.h>
+#include "JingleJamSandwichGameModeBase.h"
 
 // Sets default values
 AToy::AToy()
@@ -26,7 +27,8 @@ void AToy::BeginPlay()
 void AToy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	FVector NewLocation = GetActorLocation() + (FVector(0, MovementSpeed, 0) * DeltaTime);
+	SetActorLocation(NewLocation);
 }
 
 void AToy::RandomiseToy()
@@ -67,7 +69,7 @@ void AToy::RandomiseToy()
 
 void AToy::LoadMesh(FString MeshName)
 {
-	FString Directory = "StaticMesh'/Game/Meshes/" + MeshName + "." + MeshName + "'";
+	FString Directory = "StaticMesh'/Game/Meshes/Props/" + MeshName + "." + MeshName + "'";
 	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(NULL, *Directory);
 	if (MeshAsset != nullptr)
 	{

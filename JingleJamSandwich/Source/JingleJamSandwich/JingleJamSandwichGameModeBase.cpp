@@ -13,6 +13,7 @@
 #include <JingleJamSandwich\Pawns\Elf.h>
 #include <JingleJamSandwich\Pawns\Krampus.h>
 #include <DefaultPawnOverride.h>
+#include <Materials/MaterialInstance.h>
 
 AJingleJamSandwichGameModeBase::AJingleJamSandwichGameModeBase()
 {
@@ -42,6 +43,7 @@ void AJingleJamSandwichGameModeBase::StartGame()
 			pc->SetInputMode(input);
 		}
 	}
+
 	GameState = ePlaying;
 
 	SpawnToy();
@@ -143,9 +145,6 @@ void AJingleJamSandwichGameModeBase::DamageElf()
 	{
 		KillElf();
 	}
-	else
-	{
-	}	
 }
 
 void AJingleJamSandwichGameModeBase::MakeList()
@@ -155,8 +154,8 @@ void AJingleJamSandwichGameModeBase::MakeList()
 	for (int32 i = 0; i < 4; ++i)
 	{
 		FToyItem item;
-		item.ItemType = FMath::RandRange(0, 5);
-		item.colour = (EMachineColour)FMath::RandRange(0, 4);
+		item.ItemType = FMath::RandRange(1, 8);
+		item.colour = (EMachineColour)FMath::RandRange(0, 3);
 		ItemList.Add(item);
 	}
 }
@@ -167,6 +166,23 @@ void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy, EMachineColour InColo
 	if (InToy && InToy->IsValidLowLevel())
 	{
 		InToy->colour = InColour;
+		switch (InColour)
+		{
+		case eRed:
+			ChangeMaterial("Red", InToy);
+			break;
+		case eBlue:
+			ChangeMaterial("Blue", InToy);
+			break;
+		case eGreen:
+			ChangeMaterial("Green", InToy);
+			break;
+		case eYellow:
+			ChangeMaterial("Yellow", InToy);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -183,12 +199,20 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 			toyColour == ItemList[i].colour)
 		{
 			ItemList.RemoveAt(i);
+			validToy = true;
+			Score += DELIVER_POINTS;
 			break;
 		}
 	}
 
 	if (!validToy)
 		return;
+
+	if (ItemList.Num() <= 0)
+	{
+		Score += LIST_CLEAR_POINTS;
+		MakeList();
+	}
 
 	InToy->BeginDestroy();
 }
@@ -198,6 +222,31 @@ void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
 	if (InToy && InToy->IsValidLowLevel())
 	{
 		InToy->BeginDestroy();
+	}
+}
+
+void AJingleJamSandwichGameModeBase::ChangeMaterial(FString MaterialName, AToy* InToy)
+{
+	UMaterialInstance* MaterialAsset = LoadObject<UMaterialInstance>(NULL, *FString("MaterialInstanceConstant'/Game/Materials/" + MaterialName + "." + MaterialName + "'"));
+	if (MaterialAsset != nullptr)
+	{
+		InToy->mesh->SetMaterial(0, MaterialAsset);
+	}
+}
+
+void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour)
+{
+	Machines[(int32)InMachineColour].Broken = true;
+}
+
+void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColour)
+{
+	Machines[(int32)InMachineColour].RepairTime += DeltaTime;
+
+	if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
+	{
+		Machines[(int32)InMachineColour].RepairTime = 0;
+		Machines[(int32)InMachineColour].Broken = false;
 	}
 }
 
@@ -278,7 +327,7 @@ void AJingleJamSandwichGameModeBase::UpdateLossState()
 void AJingleJamSandwichGameModeBase::UpdateGame()
 {
 	GameTimer -= DeltaTime;
-
+	ElfHealthNormal = ((float)ElfHealth / (float)ELF_HEALTH_MAX);
 	bShowHUD = true;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Time left: " + FString::SanitizeFloat(GameTimer)));
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Health left: " + FString::FromInt(ElfHealth)));
@@ -311,6 +360,7 @@ void AJingleJamSandwichGameModeBase::Reset()
 void AJingleJamSandwichGameModeBase::KillElf()
 {
 	--ElfLives;
+	ElfHealth = ELF_HEALTH_MAX;
 
 	if (ElfLives <= 0)
 	{
@@ -319,8 +369,11 @@ void AJingleJamSandwichGameModeBase::KillElf()
 	else
 	{
 		// Respawn elf at starting point
-		Elf->SetActorLocation(ElfStart);
-		ElfHealth = ELF_HEALTH_MAX;
+		if (Elf)
+		{
+			Elf->SetActorLocation(ElfStart);
+			Score = 0;
+		}
 		// reset rotation
 	}
 }

@@ -3,14 +3,23 @@
 
 #include "Krampus.h"
 #include "Components/InputComponent.h"
+#include "JingleJamSandwichGameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/CapsuleComponent.h"
+#include <Runtime\Engine\Classes\Engine\SkeletalMesh.h>
 
 // Sets default values
 AKrampus::AKrampus()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	CapsuleComp->SetCapsuleHalfHeight(500.0f);
+	CapsuleComp->SetCapsuleRadius(200.0f);
+	CapsuleComp->SetGenerateOverlapEvents(true);
 	RootComponent = mesh;
+	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
 	LoadMesh();
 }
 
@@ -44,11 +53,11 @@ void AKrampus::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AKrampus::LoadMesh()
 {
-	FString Directory = "StaticMesh'/Game/Meshes/Krampus.Krampus'";
-	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(NULL, *Directory);
+	//load Skeletal mesh
+	USkeletalMesh* MeshAsset = LoadObject<USkeletalMesh>(NULL, *FString("SkeletalMesh'/Game/Characters/Krampus/Krampus_01_SK.Krampus_01_SK'"));
 	if (MeshAsset != nullptr)
 	{
-		mesh->SetStaticMesh(MeshAsset);
+		mesh->SetSkeletalMesh(MeshAsset);
 	}
 }
 
@@ -60,4 +69,44 @@ void AKrampus::MoveX(float amount)
 void AKrampus::MoveY(float amount)
 {
 	Velocity.Y = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
+}
+
+void AKrampus::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	FString triggerName = FString(*OtherActor->GetName());
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
+
+	FString LHS = "";
+	FString RHS = "";
+
+	triggerName.Split("_", &LHS, &RHS);
+
+	if (RHS.Contains("GREEN"))
+	{
+		MachineOverlap = (int32)EMachineColour::eGreen;
+	}
+	else if (RHS.Contains("RED"))
+	{
+		MachineOverlap = (int32)EMachineColour::eRed;
+	}
+	else if (RHS.Contains("BLUE"))
+	{
+		MachineOverlap = (int32)EMachineColour::eBlue;
+	}
+	else if (RHS.Contains("YELLOW"))
+	{
+		MachineOverlap = (int32)EMachineColour::eYellow;
+	}
+	else if (RHS.Contains("ELF"))
+	{
+		bElfOverlap = true;
+	}
+}
+
+void AKrampus::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bElfOverlap = false;
+	MachineOverlap = (int32)EMachineColour::eColourMax;
 }

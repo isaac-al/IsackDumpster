@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "Krampus.generated.h"
 
+class UCapsuleComponent;
+
 UCLASS()
 class JINGLEJAMSANDWICH_API AKrampus : public APawn
 {
@@ -27,14 +29,24 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(BlueprintReadWrite)
-		UStaticMeshComponent* mesh;
+		USkeletalMeshComponent* mesh;
+
+	UPROPERTY(BlueprintReadWrite)
+		UCapsuleComponent* CapsuleComp;
 
 	UFUNCTION(BlueprintCallable)
 		void LoadMesh();
 
 	FVector Velocity;
 	float SpeedModifier = 250.0f;
-
+	int32 MachineOverlap = 4;
+	bool bElfOverlap = false;
 	void MoveX(float amount);
 	void MoveY(float amount);
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

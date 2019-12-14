@@ -14,6 +14,9 @@ class AKrampus;
 #define ELF_HEALTH_MAX 3
 #define ELF_LIVES_MAX 3
 #define NUM_MACHINES 4
+#define DELIVER_POINTS 50
+#define LIST_CLEAR_POINTS 100
+#define MAX_REPAIR_TIME 5.0f
 
 enum EState
 {
@@ -47,7 +50,6 @@ struct FMachine
 	bool Broken = false;
 };
 
-
 /**
  * 
  */
@@ -75,9 +77,18 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	int32 ElfLives = ELF_LIVES_MAX;
 
+	UPROPERTY(BlueprintReadOnly)
+	float ElfHealthNormal = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	float GameTimer = GAME_TIME;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 Score = 0;
+
 	FMachine Machines[NUM_MACHINES];
 	float DeltaTime = 0.0f;
-	float GameTimer = GAME_TIME;
+
 	FVector ElfStart = FVector(-1900.0f, 1540.0f, -9.999786f);
 
 	UFUNCTION(BlueprintCallable)
@@ -103,6 +114,13 @@ public:
 	void PaintToy(AToy* InToy, EMachineColour InColour);
 	void DeliverToy(AToy* InToy);
 	void DestroyToy(AToy* InToy);
+
+	void BreakMachine(EMachineColour InMachineColour);
+	void RepairMachine(EMachineColour InMachineColour);
+
+
+	void ChangeMaterial(FString MaterialName, AToy* InToy);
+
 	UPROPERTY(BlueprintReadWrite)
 	bool bPleaseOpenPauseThanks = false;
 	UPROPERTY(BlueprintReadWrite)

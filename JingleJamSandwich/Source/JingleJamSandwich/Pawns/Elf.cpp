@@ -13,12 +13,14 @@ AElf::AElf()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	SetRootComponent(CapsuleComp);
 	CapsuleComp->SetCapsuleHalfHeight(500.0f);
 	CapsuleComp->SetCapsuleRadius(200.0f);
 	CapsuleComp->SetGenerateOverlapEvents(true);
+	RootComponent = mesh;
+	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
+	
 	LoadMesh();
 }
 
@@ -53,11 +55,10 @@ void AElf::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AElf::LoadMesh()
 {
-	FString Directory = "StaticMesh'/Game/Meshes/Elf.Elf'";
-	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(NULL, *Directory);
+	USkeletalMesh* MeshAsset = LoadObject<USkeletalMesh>(NULL, *FString("SkeletalMesh'/Game/Characters/Elf/Elf_01_SK.Elf_01_SK'"));
 	if (MeshAsset != nullptr)
 	{
-		mesh->SetStaticMesh(MeshAsset);
+		mesh->SetSkeletalMesh(MeshAsset);
 	}
 }
 
@@ -85,26 +86,37 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 	if (RHS.Contains("GREEN"))
 	{
+		MachineOverlap = (int32)EMachineColour::eGreen;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eGreen);
 	}
 	else if (RHS.Contains("RED"))
 	{
+		MachineOverlap = (int32)EMachineColour::eRed;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eRed);
 	}
 	else if (RHS.Contains("BLUE"))
 	{
+		MachineOverlap = (int32)EMachineColour::eBlue;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eBlue);
 	}
 	else if (RHS.Contains("YELLOW"))
 	{
+		MachineOverlap = (int32)EMachineColour::eYellow;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eYellow);
 	}
 	else if (RHS.Contains("DELIVER"))
 	{
+		bDeliveryOverlap = true;
 		gamemode->DeliverToy(CurrentToy);
 	}
 	else if (RHS.Contains("TRASH"))
 	{
 		gamemode->DestroyToy(CurrentToy);
 	}
+}
+
+void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	MachineOverlap = (int32)EMachineColour::eColourMax;
+	bDeliveryOverlap = false;
 }

@@ -8,6 +8,8 @@
 
 class UCapsuleComponent;
 class AToy;
+class AJingleJamSandwichGameModeBase;
+enum EMachineColour;
 
 UCLASS()
 class JINGLEJAMSANDWICH_API AElf : public APawn
@@ -30,7 +32,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(BlueprintReadWrite)
-	UStaticMeshComponent* mesh;
+	USkeletalMeshComponent* mesh;
 
 	UPROPERTY(BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
@@ -40,12 +42,17 @@ public:
 
 	FVector Velocity = FVector::ZeroVector;
 	float SpeedModifier = 250.0f;
-
+	int32 MachineOverlap = 4;
+	bool bDeliveryOverlap = false;
 	void MoveX(float amount);
 	void MoveY(float amount);
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 private:
 
 	UPROPERTY()
