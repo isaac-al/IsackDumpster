@@ -18,7 +18,7 @@ void AToy::BeginPlay()
 {
 	Super::BeginPlay();
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, FString("Toy boi"));
-	//TO DO : Replace this with call to Randomise
+	//TO DO : Replace this with call to RandomiseToy
 	LoadMesh("Test");
 }
 
