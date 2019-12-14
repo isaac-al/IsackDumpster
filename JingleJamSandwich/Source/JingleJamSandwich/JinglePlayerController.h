@@ -6,6 +6,9 @@
 #include "GameFramework/PlayerController.h"
 #include "JinglePlayerController.generated.h"
 
+class AKrampus;
+class AElf;
+
 /**
  * 
  */
@@ -23,4 +26,12 @@ public:
 	void ActionReleased();
 	void DropReleased();
 	void PauseReleased();
+
+	void KrampusMoveX(float amount);
+	void KrampusMoveY(float amount);
+	void ElfMoveX(float amount);
+	void ElfMoveY(float amount);
+
+	AKrampus* Krampus = nullptr;
+	AElf* Elf = nullptr;
 };

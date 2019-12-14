@@ -12,10 +12,12 @@
 #include <GameFramework/PlayerController.h>
 #include <JingleJamSandwich\Pawns\Elf.h>
 #include <JingleJamSandwich\Pawns\Krampus.h>
+#include <DefaultPawnOverride.h>
 
 AJingleJamSandwichGameModeBase::AJingleJamSandwichGameModeBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	DefaultPawnClass = ADefaultPawnOverride::StaticClass();
 	PlayerControllerClass = AJinglePlayerController::StaticClass();
 }
 
@@ -23,12 +25,10 @@ void AJingleJamSandwichGameModeBase::StartGame()
 {
 	// iterate through players
 	TArray<AActor*> controllers;
-	TArray<AActor*> elves;
-	TArray<AActor*> krampai;
+
+	TSubclassOf<AJinglePlayerController> jingleControllers;
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElf::StaticClass(), elves);
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AKrampus::StaticClass(), krampai);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -44,12 +44,6 @@ void AJingleJamSandwichGameModeBase::StartGame()
 	}
 	GameState = ePlaying;
 
-	Elf = Cast<AElf>(elves[0]);
-	Krampus = Cast<AKrampus>(krampai[0]);
-
-	AJinglePlayerController* elfPC = Cast<AJinglePlayerController>(controllers[0]);
-
-	elfPC->Possess(Elf);
 	SpawnToy();
 
 	bPleaseOpenMainThanks = false;

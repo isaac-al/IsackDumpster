@@ -25,6 +25,7 @@ void AKrampus::BeginPlay()
 void AKrampus::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	//if we have movement
 	if (!Velocity.IsZero())
 	{
@@ -61,4 +62,3 @@ void AKrampus::MoveY(float amount)
 {
 	Velocity.Y = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
 }
-
