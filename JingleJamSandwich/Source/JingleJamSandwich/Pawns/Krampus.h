@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "Krampus.generated.h"
 
+class UCapsuleComponent;
+
 UCLASS()
 class JINGLEJAMSANDWICH_API AKrampus : public APawn
 {
@@ -27,7 +29,10 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(BlueprintReadWrite)
-		UStaticMeshComponent* mesh;
+		USkeletalMeshComponent* mesh;
+
+	UPROPERTY(BlueprintReadWrite)
+		UCapsuleComponent* CapsuleComp;
 
 	UFUNCTION(BlueprintCallable)
 		void LoadMesh();

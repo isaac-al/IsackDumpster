@@ -27,6 +27,8 @@ public:
 
 	void LoadMesh(FString MeshName);
 
+	float MovementSpeed = 100.0f;
+
 	UStaticMeshComponent* mesh;
 	FString materialType;
 	int32 itemType = 0;

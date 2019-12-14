@@ -32,7 +32,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(BlueprintReadWrite)
-	UStaticMeshComponent* mesh;
+	USkeletalMeshComponent* mesh;
 
 	UPROPERTY(BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;

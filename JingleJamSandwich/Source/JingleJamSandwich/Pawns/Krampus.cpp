@@ -5,14 +5,21 @@
 #include "Components/InputComponent.h"
 #include "JingleJamSandwichGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/CapsuleComponent.h"
+#include <Runtime\Engine\Classes\Engine\SkeletalMesh.h>
 
 // Sets default values
 AKrampus::AKrampus()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
+	CapsuleComp->SetCapsuleHalfHeight(500.0f);
+	CapsuleComp->SetCapsuleRadius(200.0f);
+	CapsuleComp->SetGenerateOverlapEvents(true);
 	RootComponent = mesh;
+	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
 	LoadMesh();
 }
 
@@ -46,11 +53,11 @@ void AKrampus::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AKrampus::LoadMesh()
 {
-	FString Directory = "StaticMesh'/Game/Meshes/Krampus.Krampus'";
-	UStaticMesh* MeshAsset = LoadObject<UStaticMesh>(NULL, *Directory);
+	//load Skeletal mesh
+	USkeletalMesh* MeshAsset = LoadObject<USkeletalMesh>(NULL, *FString("SkeletalMesh'/Game/Characters/Krampus/Krampus_01_SK.Krampus_01_SK'"));
 	if (MeshAsset != nullptr)
 	{
-		mesh->SetStaticMesh(MeshAsset);
+		mesh->SetSkeletalMesh(MeshAsset);
 	}
 }
 
