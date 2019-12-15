@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include <Runtime\Engine\Classes\Engine\SkeletalMesh.h>
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AKrampus::AKrampus()
@@ -38,7 +39,10 @@ void AKrampus::Tick(float DeltaTime)
 	if (!Velocity.IsZero())
 	{
 		FVector NewLocation = GetActorLocation() + (Velocity * DeltaTime);
+		FVector lookat = NewLocation;
+		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), NewLocation);
 		SetActorLocation(NewLocation);
+		SetActorRotation(NewRotation);
 	}
 }
 

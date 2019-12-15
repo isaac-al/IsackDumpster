@@ -140,12 +140,17 @@ void AJingleJamSandwichGameModeBase::SpawnToy()
 
 void AJingleJamSandwichGameModeBase::DamageElf()
 {
-	--ElfHealth;
-
-	if (ElfHealth <= 0)
+	if (Krampus->bElfOverlap)
 	{
-		KillElf();
-	}
+		--ElfHealth;
+
+		if (ElfHealth <= 0)
+		{
+			KillElf();
+		}
+
+		Krampus->bElfOverlap = false;
+	}	
 }
 
 void AJingleJamSandwichGameModeBase::MakeList()
@@ -247,6 +252,8 @@ void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour
 void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColour)
 {
 	Machines[(int32)InMachineColour].RepairTime += DeltaTime;
+
+	RepairTime = Machines[(int32)InMachineColour].RepairTime;
 
 	if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
 	{
