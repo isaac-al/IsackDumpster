@@ -88,6 +88,7 @@ void AJinglePlayerController::DropReleased()
 			Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			FVector currentLocation = Elf->CurrentToy->GetActorLocation();
 			Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X, currentLocation.Y, 0.0f));
+			Elf->CurrentToy->SetActorRotation(FRotator::ZeroRotator);
 			Elf->MachineOverlap = EMachineColour::eColourMax;
 			Elf->CurrentToy = nullptr;
 		}

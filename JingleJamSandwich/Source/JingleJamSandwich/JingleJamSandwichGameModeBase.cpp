@@ -286,14 +286,16 @@ void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour
 
 void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColour)
 {
-	Machines[(int32)InMachineColour].RepairTime += DeltaTime;
+	if (Machines[(int32)InMachineColour].Broken == true) {
+		Machines[(int32)InMachineColour].RepairTime += DeltaTime;
 
-	RepairTime = Machines[(int32)InMachineColour].RepairTime;
+		RepairTime = Machines[(int32)InMachineColour].RepairTime;
 
-	if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
-	{
-		Machines[(int32)InMachineColour].RepairTime = 0;
-		Machines[(int32)InMachineColour].Broken = false;
+		if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
+		{
+			Machines[(int32)InMachineColour].RepairTime = 0;
+			Machines[(int32)InMachineColour].Broken = false;
+		}
 	}
 }
 
