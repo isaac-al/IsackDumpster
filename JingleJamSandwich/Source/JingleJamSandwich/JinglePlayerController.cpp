@@ -36,6 +36,7 @@ void AJinglePlayerController::SetupInputComponent()
  	}
 	
 	InputComponent->BindAction("Action", EInputEvent::IE_Released, this, &AJinglePlayerController::ActionReleased);
+	InputComponent->BindAction("Action", EInputEvent::IE_Pressed, this, &AJinglePlayerController::ActionPressed);
 	InputComponent->BindAction("KrampusAction", EInputEvent::IE_Released, this, &AJinglePlayerController::KrampusActionReleased);
 	InputComponent->BindAction("Drop", EInputEvent::IE_Released, this, &AJinglePlayerController::DropReleased);
 	InputComponent->BindAction("Pause", EInputEvent::IE_Released, this, &AJinglePlayerController::PauseReleased);
@@ -44,6 +45,15 @@ void AJinglePlayerController::SetupInputComponent()
 	InputComponent->BindAxis("Krampus_Y", this, &AJinglePlayerController::KrampusMoveY);
 	InputComponent->BindAxis("Elf_X", this, &AJinglePlayerController::ElfMoveX);
 	InputComponent->BindAxis("Elf_Y", this, &AJinglePlayerController::ElfMoveY);
+}
+
+void AJinglePlayerController::ActionPressed()
+{
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (Elf->MachineOverlap != 4 && gamemode->Machines[Elf->MachineOverlap].Broken)
+	{
+		Elf->bRepairingMachine = true;
+	}
 }
 
 void AJinglePlayerController::ActionReleased()
@@ -75,6 +85,10 @@ void AJinglePlayerController::ActionReleased()
 			Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
 			Elf->CurrentToy->MovementSpeed = 0.0f;
 		}
+		else if(Elf->MachineOverlap != 4 && gamemode->Machines[Elf->MachineOverlap].Broken)
+		{
+				Elf->bRepairingMachine = false;
+		}
 	}
 }
 
@@ -88,6 +102,7 @@ void AJinglePlayerController::DropReleased()
 			Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 			FVector currentLocation = Elf->CurrentToy->GetActorLocation();
 			Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X, currentLocation.Y, 0.0f));
+			Elf->CurrentToy->SetActorRotation(FRotator::ZeroRotator);
 			Elf->MachineOverlap = EMachineColour::eColourMax;
 			Elf->CurrentToy = nullptr;
 		}

@@ -28,14 +28,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadWrite)
-		USkeletalMeshComponent* mesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* mesh;
 
-	UPROPERTY(BlueprintReadWrite)
-		UCapsuleComponent* CapsuleComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UCapsuleComponent* CapsuleComp;
 
 	UFUNCTION(BlueprintCallable)
-		void LoadMesh();
+	void LoadMesh();
 
 	FVector Velocity;
 	float SpeedModifier = 250.0f;
@@ -49,4 +49,8 @@ public:
 
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+private:
+	FVector CurrentLocation;
+	FRotator CurrentRotation;
 };

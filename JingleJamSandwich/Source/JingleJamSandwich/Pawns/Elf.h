@@ -31,14 +31,16 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* mesh;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
 
+	bool bRepairingMachine = false;
+
 	UPROPERTY()
-		AToy* CurrentToy = nullptr;
+	AToy* CurrentToy = nullptr;
 
 	UFUNCTION(BlueprintCallable)
 	void LoadMesh();
@@ -47,6 +49,12 @@ public:
 	float SpeedModifier = 250.0f;
 	int32 MachineOverlap = 4;
 	bool bDeliveryOverlap = false;
+
+	FVector StartLocation;
+	FVector CurrentLocation;
+	FRotator StartRotation;
+	FRotator CurrentRotation;
+
 	void MoveX(float amount);
 	void MoveY(float amount);
 
@@ -59,6 +67,4 @@ public:
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
-
-
 };
