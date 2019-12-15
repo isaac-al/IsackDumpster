@@ -8,6 +8,7 @@
 #include <UserWidget.h>
 #include <JingleJamSandwich\Pawns\Krampus.h>
 #include <JingleJamSandwich\Pawns\Elf.h>
+#include <JingleJamSandwich\Toy\Toy.h>
 
 void AJinglePlayerController::BeginPlay()
 {
@@ -49,30 +50,23 @@ void AJinglePlayerController::ActionReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (gamemode && gamemode->GameState == ePlaying)
+	if (Elf->CurrentToy != nullptr) 
 	{
-		gamemode->DamageElf();
+		Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
+		Elf->CurrentToy->MovementSpeed = 0.0f;
 	}
 }
 
 void AJinglePlayerController::DropReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if (gamemode)
+	
+	if (Elf->CurrentToy != nullptr)
 	{
-		if (gamemode->GameState == eMainMenu)
-		{
-			gamemode->GameState = ePlaying;
-		}
-		else if (gamemode->GameState == eWon || gamemode->GameState == eLost)
-		{
-			gamemode->GameState = eMainMenu;
-		}
-		else if (gamemode->GameState == ePlaying)
-		{
-			gamemode->MakeList();
-		}		
+		Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		FVector currentLocation = Elf->CurrentToy->GetActorLocation();
+		Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X,currentLocation.Y,0.0f));
+		Elf->CurrentToy = nullptr;
 	}
 }
 

@@ -72,6 +72,14 @@ void AElf::MoveY(float amount)
 	Velocity.Y = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
 }
 
+void AElf::PickUpToy(AToy* OverlapToy)
+{
+	if (CurrentToy == nullptr) 
+	{
+		CurrentToy = OverlapToy;
+	}
+}
+
 void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
@@ -82,11 +90,7 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	AToy* OverlapToy = Cast<AToy>(OtherActor);
 
 	if (OverlapToy != nullptr) {
-
-		CurrentToy = OverlapToy;
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString("TOY: " + triggerName));
-		CurrentToy->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
-		CurrentToy->MovementSpeed = 0.0f;
+		PickUpToy(OverlapToy);
 	}
 
 	if (triggerName.Contains("GREEN"))
@@ -124,4 +128,5 @@ void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 {
 	MachineOverlap = (int32)EMachineColour::eColourMax;
 	bDeliveryOverlap = false;
+	CurrentToy = nullptr;
 }
