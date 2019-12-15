@@ -207,6 +207,12 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 			ItemList.RemoveAt(i);
 			validToy = true;
 			Score += DELIVER_POINTS;
+			Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			FVector currentLocation = Elf->CurrentToy->GetActorLocation();
+			Elf->CurrentToy->SetActorLocation(FVector(Elf->GetActorLocation().X, -3090.0f, 140.0f));
+			Elf->CurrentToy->MovementSpeed = 100.0f;
+			Elf->CurrentToy->bCanBePickedUp = false;
+			Elf->CurrentToy = nullptr;
 			break;
 		}
 	}
@@ -219,12 +225,7 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 		Score += LIST_CLEAR_POINTS;
 		MakeList();
 	}
-	Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	FVector currentLocation = Elf->CurrentToy->GetActorLocation();
-	Elf->CurrentToy->SetActorLocation(FVector(-310.0, -3090.0f, 140.0f));
-	Elf->CurrentToy->MovementSpeed = 100.0f;
-	Elf->CurrentToy->bCanBePickedUp = false;
-	Elf->CurrentToy = nullptr;
+	
 }
 
 void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
