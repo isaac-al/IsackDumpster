@@ -47,6 +47,12 @@ public:
 	float SpeedModifier = 250.0f;
 	int32 MachineOverlap = 4;
 	bool bDeliveryOverlap = false;
+
+	FVector StartLocation;
+	FVector CurrentLocation;
+	FRotator StartRotation;
+	FRotator CurrentRotation;
+
 	void MoveX(float amount);
 	void MoveY(float amount);
 
@@ -59,7 +65,4 @@ public:
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
-
-	FVector CurrentLocation;
-	FRotator CurrentRotation;
 };

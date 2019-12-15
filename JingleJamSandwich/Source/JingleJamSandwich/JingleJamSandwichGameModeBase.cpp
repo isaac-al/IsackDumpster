@@ -446,7 +446,8 @@ void AJingleJamSandwichGameModeBase::KillElf()
 		// Respawn elf at starting point
 		if (Elf)
 		{
-			Elf->SetActorLocation(ElfStart);
+			Elf->SetActorLocation(Elf->StartLocation);
+			Elf->SetActorRotation(Elf->StartRotation);
 			Score = 0;
 		}
 		// reset rotation
