@@ -86,11 +86,13 @@ void AJinglePlayerController::ActionReleased()
 			Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
 			Elf->CurrentToy->MovementSpeed = 0.0f;
 		}
-		else if(Elf->MachineOverlap != 4 && gamemode->Machines[Elf->MachineOverlap].Broken)
-		{
-				Elf->bRepairingMachine = false;
-		}
 	}
+	else 
+	{
+
+	}
+
+	Elf->bRepairingMachine = false;
 }
 
 void AJinglePlayerController::DropReleased()

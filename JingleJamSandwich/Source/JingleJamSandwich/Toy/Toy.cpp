@@ -18,6 +18,8 @@ AToy::AToy()
 	BoxComponent->SetGenerateOverlapEvents(true);
 
 	BoxComponent->SetupAttachment(mesh, FName("BoxCollider"));
+	BoxComponent->SetWorldScale3D(FVector::OneVector * 2.5f);
+	BoxComponent->SetVisibility(true);
 }
 
 // Called when the game starts or when spawned

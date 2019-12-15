@@ -61,7 +61,7 @@ void AJingleJamSandwichGameModeBase::Pause()
 {
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), jingleController, controllers);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -83,7 +83,7 @@ void AJingleJamSandwichGameModeBase::Resume()
 {
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), jingleController, controllers);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -106,7 +106,7 @@ void AJingleJamSandwichGameModeBase::BackToMenu()
 	// iterate through players
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), jingleController, controllers);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -136,7 +136,7 @@ void AJingleJamSandwichGameModeBase::Restart()
 
 void AJingleJamSandwichGameModeBase::SpawnToy()
 {
-	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector(46.468418f, 899.603516f, 212.685196f), FRotator::ZeroRotator);
+	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector(59.542191f, 862.792236f, 147.721680f), FRotator::ZeroRotator);
 }
 
 void AJingleJamSandwichGameModeBase::DamageElf()
@@ -161,7 +161,7 @@ void AJingleJamSandwichGameModeBase::MakeList()
 	for (int32 i = 0; i < 4; ++i)
 	{
 		FToyItem item;
-		item.ItemType = FMath::RandRange(1, 8);
+		item.ItemType = FMath::RandRange(1, 7);
 		item.colour = (EMachineColour)FMath::RandRange(0, 3);
 		ItemList.Add(item);
 	}
@@ -287,7 +287,10 @@ void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColou
 	if (Machines[(int32)InMachineColour].Broken == true) {
 		Machines[(int32)InMachineColour].RepairTime += DeltaTime;
 
-		RepairTime = Machines[(int32)InMachineColour].RepairTime;
+		RepairTime = Machines[(int32)InMachineColour].RepairTime / MAX_REPAIR_TIME;
+
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("repair time normal: " + FString::SanitizeFloat(RepairTime)));
+
 
 		if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
 		{
@@ -400,6 +403,22 @@ void AJingleJamSandwichGameModeBase::UpdateMainMenu()
 {
 	bShowHUD = false;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("MAIN MENU"));
+	TArray<AActor*> controllers;
+	TSubclassOf<AJinglePlayerController> jingleController;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
+
+	for (int32 i = 0; i < controllers.Num(); i++)
+	{
+		AJinglePlayerController* pc = Cast<AJinglePlayerController>(controllers[i]);
+
+		if (pc && pc->IsValidLowLevel())
+		{
+			FInputModeGameAndUI input;
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			pc->bShowMouseCursor = true;
+			pc->SetInputMode(input);
+		}
+	}
 
 }
 
@@ -416,6 +435,23 @@ void AJingleJamSandwichGameModeBase::UpdateWonState()
 
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("You wonned"));
+	TArray<AActor*> controllers;
+	TSubclassOf<AJinglePlayerController> jingleController;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
+
+	for (int32 i = 0; i < controllers.Num(); i++)
+	{
+		AJinglePlayerController* pc = Cast<AJinglePlayerController>(controllers[i]);
+
+		if (pc && pc->IsValidLowLevel())
+		{
+			FInputModeGameAndUI input;
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			pc->bShowMouseCursor = true;
+			pc->SetInputMode(input);
+		}
+	}
+
 }
 
 void AJingleJamSandwichGameModeBase::UpdateLossState()
@@ -424,6 +460,22 @@ void AJingleJamSandwichGameModeBase::UpdateLossState()
 	bPleaseOpenGameOverThanks = true;
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("YOU LOST MEGABITCH"));
+	TArray<AActor*> controllers;
+	TSubclassOf<AJinglePlayerController> jingleController;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
+
+	for (int32 i = 0; i < controllers.Num(); i++)
+	{
+		AJinglePlayerController* pc = Cast<AJinglePlayerController>(controllers[i]);
+
+		if (pc && pc->IsValidLowLevel())
+		{
+			FInputModeGameAndUI input;
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			pc->bShowMouseCursor = true;
+			pc->SetInputMode(input);
+		}
+	}
 }
 
 void AJingleJamSandwichGameModeBase::UpdateGame()
@@ -448,7 +500,7 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 	if (ToyCooldown <= 0.0f)
 	{
 		SpawnToy();
-		ToyCooldown = FMath::RandRange(1, 10);
+		ToyCooldown = FMath::RandRange(2, 5);
 	}
 
 	for (int item = 0; item < ItemList.Num(); ++item)
