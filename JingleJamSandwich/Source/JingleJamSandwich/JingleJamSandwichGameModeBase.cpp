@@ -171,26 +171,28 @@ void AJingleJamSandwichGameModeBase::MakeList()
 
 void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy, EMachineColour InColour)
 {
-	// TODO: set mesh colour
-	if (InToy && InToy->IsValidLowLevel())
-	{
-		InToy->colour = InColour;
-		switch (InColour)
+	if (Machines[(int32)InColour].Broken == false) {
+		// TODO: set mesh colour
+		if (InToy && InToy->IsValidLowLevel())
 		{
-		case eRed:
-			ChangeMaterial("Red", InToy);
-			break;
-		case eBlue:
-			ChangeMaterial("Blue", InToy);
-			break;
-		case eGreen:
-			ChangeMaterial("Green", InToy);
-			break;
-		case eYellow:
-			ChangeMaterial("Yellow", InToy);
-			break;
-		default:
-			break;
+			InToy->colour = InColour;
+			switch (InColour)
+			{
+			case eRed:
+				ChangeMaterial("Red", InToy);
+				break;
+			case eBlue:
+				ChangeMaterial("Blue", InToy);
+				break;
+			case eGreen:
+				ChangeMaterial("Green", InToy);
+				break;
+			case eYellow:
+				ChangeMaterial("Yellow", InToy);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }
