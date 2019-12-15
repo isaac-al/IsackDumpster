@@ -7,6 +7,7 @@
 #include "Toy/Toy.h"
 #include "JingleJamSandwichGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AElf::AElf()
@@ -40,7 +41,10 @@ void AElf::Tick(float DeltaTime)
 	if (!Velocity.IsZero())
 	{
 		FVector NewLocation = GetActorLocation() + (Velocity * DeltaTime);
+		FVector lookat = NewLocation;
+		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), NewLocation);
 		SetActorLocation(NewLocation);
+		SetActorRotation(NewRotation);
 	}
 }
 
