@@ -28,6 +28,8 @@ AKrampus::AKrampus()
 void AKrampus::BeginPlay()
 {
 	Super::BeginPlay();
+	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AKrampus::OnOverlapBegin);
+	CapsuleComp->OnComponentEndOverlap.AddDynamic(this, &AKrampus::OnOverlapEnd);
 }
 
 // Called every frame

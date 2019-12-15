@@ -30,6 +30,7 @@ void AElf::BeginPlay()
 {
 	Super::BeginPlay();
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AElf::OnOverlapBegin);
+	CapsuleComp->OnComponentEndOverlap.AddDynamic(this, &AElf::OnOverlapEnd);
 }
 
 // Called every frame
@@ -132,5 +133,5 @@ void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 {
 	MachineOverlap = (int32)EMachineColour::eColourMax;
 	bDeliveryOverlap = false;
-	CurrentToy = nullptr;
+	//CurrentToy = nullptr;
 }
