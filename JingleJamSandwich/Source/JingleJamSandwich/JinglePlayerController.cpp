@@ -60,21 +60,13 @@ void AJinglePlayerController::ActionReleased()
 void AJinglePlayerController::DropReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if (gamemode)
+	
+	if (Elf->CurrentToy != nullptr)
 	{
-		if (gamemode->GameState == eMainMenu)
-		{
-			gamemode->GameState = ePlaying;
-		}
-		else if (gamemode->GameState == eWon || gamemode->GameState == eLost)
-		{
-			gamemode->GameState = eMainMenu;
-		}
-		else if (gamemode->GameState == ePlaying)
-		{
-			gamemode->MakeList();
-		}		
+		Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		FVector currentLocation = Elf->CurrentToy->GetActorLocation();
+		Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X,currentLocation.Y,0.0f));
+		Elf->CurrentToy = nullptr;
 	}
 }
 

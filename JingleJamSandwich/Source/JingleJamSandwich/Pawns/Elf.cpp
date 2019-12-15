@@ -74,14 +74,15 @@ void AElf::MoveY(float amount)
 
 void AElf::PickUpToy(AToy* OverlapToy)
 {
-	CurrentToy = OverlapToy;
-	//CurrentToy->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
-	//CurrentToy->MovementSpeed = 0.0f;
+	if (CurrentToy == nullptr) 
+	{
+		CurrentToy = OverlapToy;
+	}
 }
 
 void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-w	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	FString triggerName = FString(*OtherActor->GetName());
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
