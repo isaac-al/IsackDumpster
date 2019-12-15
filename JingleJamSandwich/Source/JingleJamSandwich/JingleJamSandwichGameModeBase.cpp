@@ -14,6 +14,9 @@
 #include <JingleJamSandwich\Pawns\Krampus.h>
 #include <DefaultPawnOverride.h>
 #include <Materials/MaterialInstance.h>
+#include <Particles/Emitter.h>
+#include <Particles/ParticleEmitter.h>
+#include <Particles/ParticleSystemComponent.h>
 
 AJingleJamSandwichGameModeBase::AJingleJamSandwichGameModeBase()
 {
@@ -205,6 +208,12 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 			ItemList.RemoveAt(i);
 			validToy = true;
 			Score += DELIVER_POINTS;
+			Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			FVector currentLocation = Elf->CurrentToy->GetActorLocation();
+			Elf->CurrentToy->SetActorLocation(FVector(Elf->GetActorLocation().X, -3090.0f, 140.0f));
+			Elf->CurrentToy->MovementSpeed = 100.0f;
+			Elf->CurrentToy->bCanBePickedUp = false;
+			Elf->CurrentToy = nullptr;
 			break;
 		}
 	}
@@ -217,12 +226,7 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 		Score += LIST_CLEAR_POINTS;
 		MakeList();
 	}
-	Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-	FVector currentLocation = Elf->CurrentToy->GetActorLocation();
-	Elf->CurrentToy->SetActorLocation(FVector(-310.0, -3090.0f, 140.0f));
-	Elf->CurrentToy->MovementSpeed = 100.0f;
-	Elf->CurrentToy->bCanBePickedUp = false;
-	Elf->CurrentToy = nullptr;
+	
 }
 
 void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
@@ -245,6 +249,35 @@ void AJingleJamSandwichGameModeBase::ChangeMaterial(FString MaterialName, AToy* 
 void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour)
 {
 	Machines[(int32)InMachineColour].Broken = true;
+	TArray<AActor*> Emitters;
+	TSubclassOf<AEmitter> Emitter;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEmitter::StaticClass(), Emitters);
+	FString CurrentMachineColour;
+	switch (InMachineColour)
+	{
+	case eRed:
+		CurrentMachineColour = "Red";
+		break;
+	case eBlue:
+		CurrentMachineColour = "Blue";
+		break;
+	case eGreen:
+		CurrentMachineColour = "Green";
+		break;
+	case eYellow:
+		CurrentMachineColour = "Yellow";
+		break;
+	default:
+		CurrentMachineColour = "";
+		break;
+	}
+	for(int i = 0; i < Emitters.Num(); i++){
+		FString EmitterName = Emitters[i]->GetFullName();
+		if (EmitterName.Contains(CurrentMachineColour)) {
+			UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
+			particle->ActivateSystem();
+		}
+	}
 }
 
 void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColour)
@@ -276,6 +309,17 @@ void AJingleJamSandwichGameModeBase::BeginPlay()
 	TSubclassOf<AElf> elf;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElf::StaticClass(), Elves);
 	Elf = Cast<AElf>(Elves[0]);
+
+	TArray<AActor*> Emitters;
+	TSubclassOf<AEmitter> emitter;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEmitter::StaticClass(), Emitters);
+	for (int i = 0; i < Emitters.Num(); i++) {
+		FString EmitterName = Emitters[i]->GetFullName();
+		if (EmitterName.Contains("Fire") == false) {
+			UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
+			particle->DeactivateSystem();
+		}
+	}
 
 	Reset();
 }

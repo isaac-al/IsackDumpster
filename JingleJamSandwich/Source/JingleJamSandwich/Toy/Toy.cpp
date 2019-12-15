@@ -37,7 +37,7 @@ void AToy::Tick(float DeltaTime)
 
 void AToy::RandomiseToy()
 {
-	int chosenToy = FMath::RandRange(1, 8);
+	int chosenToy = FMath::RandRange(1, 7);
 
 	switch (chosenToy) {
 	case 1:
@@ -50,7 +50,7 @@ void AToy::RandomiseToy()
 		LoadMesh("Ball");
 		break;
 	case 4:
-		LoadMesh("Sword");
+		LoadMesh("Candy_Cane");
 		break;
 	case 5:
 		LoadMesh("Game");
@@ -60,9 +60,6 @@ void AToy::RandomiseToy()
 		break;
 	case 7:
 		LoadMesh("Robot");
-		break;
-	case 8:
-		LoadMesh("Candy_Cane");
 		break;
 	default:
 		break;
