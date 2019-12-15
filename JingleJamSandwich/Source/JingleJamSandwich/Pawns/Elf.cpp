@@ -15,8 +15,8 @@ AElf::AElf()
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	CapsuleComp->SetCapsuleHalfHeight(500.0f);
-	CapsuleComp->SetCapsuleRadius(200.0f);
+	CapsuleComp->SetCapsuleHalfHeight(100.0f);
+	CapsuleComp->SetCapsuleRadius(50.0f);
 	CapsuleComp->SetGenerateOverlapEvents(true);
 	RootComponent = mesh;
 	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
