@@ -207,6 +207,7 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 		if (itemType == ItemList[i].ItemType &&
 			toyColour == ItemList[i].colour)
 		{
+			Delivered->Play();
 			ItemList.RemoveAt(i);
 			validToy = true;
 			Score += DELIVER_POINTS;
@@ -276,6 +277,7 @@ void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour
 	for(int i = 0; i < Emitters.Num(); i++){
 		FString EmitterName = Emitters[i]->GetFullName();
 		if (EmitterName.Contains(CurrentMachineColour)) {
+			Sabotage->Play();
 			UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
 			particle->ActivateSystem();
 		}
@@ -286,7 +288,7 @@ void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColou
 {
 	if (Machines[(int32)InMachineColour].Broken == true) {
 		Machines[(int32)InMachineColour].RepairTime += DeltaTime;
-
+		Fixing->Play();
 		RepairTime = Machines[(int32)InMachineColour].RepairTime;
 
 		if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
@@ -319,6 +321,8 @@ void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColou
 				FString EmitterName = Emitters[i]->GetFullName();
 				if (EmitterName.Contains(CurrentMachineColour)) {
 					UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
+					Fixing->Stop();
+					FixComplete->Play();
 					particle->DeactivateSystem();
 				}
 			}
@@ -332,6 +336,12 @@ void AJingleJamSandwichGameModeBase::BeginPlay()
 	bPleaseOpenMainThanks = true;
 	bPleaseOpenPauseThanks = false;
 	bPleaseOpenGameOverThanks = false;
+
+	Fixing = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/Fixing.Fixing'"));
+	FixComplete = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/FixCompleted.FixCompleted'"));
+	Sabotage = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/Sabotage.Sabotage'"));
+	Delivered = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/Deliver.Deliver'"));
+
 
 	TArray<AActor*> Krampai;
 	TSubclassOf<AKrampus> krampus;

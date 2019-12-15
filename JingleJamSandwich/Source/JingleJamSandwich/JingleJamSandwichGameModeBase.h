@@ -68,6 +68,11 @@ public:
 	AElf* Elf; 
 	AKrampus* Krampus;
 
+	UAudioComponent* Sabotage;
+	UAudioComponent* Fixing;
+	UAudioComponent* FixComplete;
+	UAudioComponent* Delivered;
+
 	EState GameState;
 	TArray<FToyItem> ItemList;
 	
@@ -79,6 +84,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	float ElfHealthNormal = 0.0f;
+
 
 	UPROPERTY(BlueprintReadOnly)
 	float GameTimer = GAME_TIME;
