@@ -295,6 +295,35 @@ void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColou
 		{
 			Machines[(int32)InMachineColour].RepairTime = 0;
 			Machines[(int32)InMachineColour].Broken = false;
+			TArray<AActor*> Emitters;
+			TSubclassOf<AEmitter> Emitter;
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEmitter::StaticClass(), Emitters);
+			FString CurrentMachineColour;
+			switch (InMachineColour)
+			{
+			case eRed:
+				CurrentMachineColour = "Red";
+				break;
+			case eBlue:
+				CurrentMachineColour = "Blue";
+				break;
+			case eGreen:
+				CurrentMachineColour = "Green";
+				break;
+			case eYellow:
+				CurrentMachineColour = "Yellow";
+				break;
+			default:
+				CurrentMachineColour = "";
+				break;
+			}
+			for (int i = 0; i < Emitters.Num(); i++) {
+				FString EmitterName = Emitters[i]->GetFullName();
+				if (EmitterName.Contains(CurrentMachineColour)) {
+					UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
+					particle->DeactivateSystem();
+				}
+			}
 		}
 	}
 }
@@ -335,6 +364,10 @@ void AJingleJamSandwichGameModeBase::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	DeltaTime = DeltaSeconds;
+
+	if (Elf->bRepairingMachine) {
+		RepairMachine((EMachineColour)Elf->MachineOverlap);
+	}
 
 	switch (GameState)
 	{

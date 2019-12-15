@@ -23,6 +23,7 @@ public:
 	virtual void SetupInputComponent() override;
 
 	// input 
+	void ActionPressed();
 	void ActionReleased();
 	void DropReleased();
 	void PauseReleased();
