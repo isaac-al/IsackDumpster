@@ -27,7 +27,7 @@ public:
 	void RandomiseToy();
 
 	void LoadMesh(FString MeshName);
-
+	bool bCanBePickedUp = true;
 	float MovementSpeed = 100.0f;
 
 	UBoxComponent* BoxComponent;

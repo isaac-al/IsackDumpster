@@ -52,6 +52,8 @@ void AJingleJamSandwichGameModeBase::StartGame()
 	bPleaseOpenGameOverThanks = false;
 	// TODO: Display HUD
 	Reset();
+	MakeList();
+	// check it twice
 }
 
 void AJingleJamSandwichGameModeBase::Pause()
@@ -217,8 +219,12 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 		Score += LIST_CLEAR_POINTS;
 		MakeList();
 	}
-
-	InToy->BeginDestroy();
+	Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	FVector currentLocation = Elf->CurrentToy->GetActorLocation();
+	Elf->CurrentToy->SetActorLocation(FVector(-310.0, -3090.0f, 140.0f));
+	Elf->CurrentToy->MovementSpeed = 100.0f;
+	Elf->CurrentToy->bCanBePickedUp = false;
+	Elf->CurrentToy = nullptr;
 }
 
 void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
@@ -262,6 +268,17 @@ void AJingleJamSandwichGameModeBase::BeginPlay()
 	bPleaseOpenMainThanks = true;
 	bPleaseOpenPauseThanks = false;
 	bPleaseOpenGameOverThanks = false;
+
+	TArray<AActor*> Krampai;
+	TSubclassOf<AKrampus> krampus;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AKrampus::StaticClass(), Krampai);
+	Krampus = Cast<AKrampus>(Krampai[0]);
+
+	TArray<AActor*> Elves;
+	TSubclassOf<AElf> elf;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElf::StaticClass(), Elves);
+	Elf = Cast<AElf>(Elves[0]);
+
 	Reset();
 }
 

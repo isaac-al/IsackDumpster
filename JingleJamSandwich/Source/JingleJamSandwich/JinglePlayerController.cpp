@@ -50,7 +50,7 @@ void AJinglePlayerController::ActionReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-	if (Elf->CurrentToy != nullptr) 
+	if (Elf->CurrentToy != nullptr && Elf->CurrentToy->bCanBePickedUp) 
 	{
 		Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
 		Elf->CurrentToy->MovementSpeed = 0.0f;
@@ -65,7 +65,7 @@ void AJinglePlayerController::DropReleased()
 	{
 		Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		FVector currentLocation = Elf->CurrentToy->GetActorLocation();
-		Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X,currentLocation.Y,0.0f));
+		Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X, currentLocation.Y, 0.0f));
 		Elf->CurrentToy = nullptr;
 	}
 }
