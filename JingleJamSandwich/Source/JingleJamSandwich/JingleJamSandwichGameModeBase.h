@@ -87,6 +87,9 @@ public:
 	float ToyCooldown = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly)
+	float RepairTime;
+
+	UPROPERTY(BlueprintReadOnly)
 	int32 Score = 0;
 
 	FMachine Machines[NUM_MACHINES];

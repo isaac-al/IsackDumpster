@@ -122,6 +122,10 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	{
 		gamemode->DestroyToy(CurrentToy);
 	}
+	else if (triggerName.Contains("krampus"))
+	{
+		gamemode->DamageElf();
+	}
 }
 
 void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
