@@ -84,6 +84,9 @@ public:
 	float GameTimer = GAME_TIME;
 
 	UPROPERTY(BlueprintReadOnly)
+	float ToyCooldown = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly)
 	int32 Score = 0;
 
 	FMachine Machines[NUM_MACHINES];

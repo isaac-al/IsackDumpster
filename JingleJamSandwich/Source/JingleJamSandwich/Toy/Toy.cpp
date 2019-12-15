@@ -5,6 +5,7 @@
 #include <Engine/Engine.h>
 #include <ConstructorHelpers.h>
 #include "JingleJamSandwichGameModeBase.h"
+#include <Components/BoxComponent.h>
 
 // Sets default values
 AToy::AToy()
@@ -12,6 +13,9 @@ AToy::AToy()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TestMesh"));
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollider"));
+	BoxComponent->SetGenerateOverlapEvents(true);
+	BoxComponent->SetupAttachment(mesh, FName("BoxCollider"));
 }
 
 // Called when the game starts or when spawned
@@ -27,7 +31,7 @@ void AToy::BeginPlay()
 void AToy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FVector NewLocation = GetActorLocation() + (FVector(0, MovementSpeed, 0) * DeltaTime);
+	FVector NewLocation = GetActorLocation() + (FVector(-MovementSpeed, 0, 0) * DeltaTime);
 	SetActorLocation(NewLocation);
 }
 

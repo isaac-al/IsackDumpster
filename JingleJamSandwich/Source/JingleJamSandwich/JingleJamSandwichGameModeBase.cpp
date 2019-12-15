@@ -72,7 +72,6 @@ void AJingleJamSandwichGameModeBase::Pause()
 			pc->SetInputMode(input);
 		}
 	}
-
 	bPleaseOpenPauseThanks = true;
 	GameState = ePaused;
 }
@@ -134,7 +133,7 @@ void AJingleJamSandwichGameModeBase::Restart()
 
 void AJingleJamSandwichGameModeBase::SpawnToy()
 {
-	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector(46.468418f, 899.603516f, 212.685196f), FRotator::ZeroRotator);
 }
 
 void AJingleJamSandwichGameModeBase::DamageElf()
@@ -337,6 +336,16 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 		// Game over biiiitch
 		GameState = eWon;
 		bPleaseOpenGameOverThanks = true;
+	}
+
+	int32 time = FMath::FloorToInt(GameTimer);
+
+	ToyCooldown -= DeltaTime;
+
+	if (ToyCooldown <= 0.0f)
+	{
+		SpawnToy();
+		ToyCooldown = FMath::RandRange(1, 10);
 	}
 
 	for (int item = 0; item < ItemList.Num(); ++item)
