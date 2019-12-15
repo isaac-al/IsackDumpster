@@ -51,6 +51,7 @@ void AJingleJamSandwichGameModeBase::StartGame()
 
 	GameState = ePlaying;
 
+	Score = 0;
 	bPleaseOpenMainThanks = false;
 	bPleaseOpenGameOverThanks = false;
 	// TODO: Display HUD
@@ -265,7 +266,10 @@ void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
 {
 	if (InToy && InToy->IsValidLowLevel())
 	{
-		InToy->BeginDestroy();
+		if (Elf->CurrentToy == InToy)
+		{
+			InToy->Destroy();
+		}
 	}
 }
 
@@ -541,9 +545,65 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 		ToyCooldown = FMath::RandRange(2, 5);
 	}
 
-	for (int item = 0; item < ItemList.Num(); ++item)
+	ListNames.Empty();
+
+	for (int32 i = 0; i < ItemList.Num(); i++)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, FString("Item: " + FString::FromInt(ItemList[item].ItemType)));
+		FString colour;
+		FString type;
+
+		switch (ItemList[i].ItemType)
+		{
+		case 1:
+			type = "Car";
+			break;
+		case 2:
+			type = "Bear";
+			break;
+		case 3:
+			type = "Ball";
+			break;
+		case 4:
+			type = "Candy Cane";
+			break;
+		case 5:
+			type = "Game";
+			break;
+		case 6:
+			type = "Book";
+			break;
+		case 7:
+			type = "Robot";
+			break;
+		default:
+			break;
+		}
+
+		switch (ItemList[i].colour)	
+		{
+		case EMachineColour::eBlue:
+			colour = "Blue";
+			break;
+		case EMachineColour::eGreen:
+			colour = "Green";
+			break;
+		case EMachineColour::eYellow:
+			colour = "Yellow";
+			break;
+		case EMachineColour::eRed:
+			colour = "Red";
+			break;
+		default:
+			break;
+		}
+
+		FString result = FString(colour.ToUpper() + " " + type.ToUpper());
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, result);
+		ListNames.Add(result);
+	}
+
+	for (int32 i = 0; i < ListNames.Num(); i++)
+	{
 	}
 }
 
@@ -573,6 +633,11 @@ void AJingleJamSandwichGameModeBase::KillElf()
 		// Respawn elf at starting point
 		if (Elf)
 		{
+			if (Elf->CurrentToy)
+			{
+				DestroyToy(Elf->CurrentToy);
+			}
+
 			Elf->SetActorLocation(Elf->StartLocation);
 			Elf->SetActorRotation(Elf->StartRotation);
 			Score = 0;

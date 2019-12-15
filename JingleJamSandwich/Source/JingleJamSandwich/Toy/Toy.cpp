@@ -29,6 +29,7 @@ void AToy::BeginPlay()
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AToy::OnOverlapBegin);
 	//TO DO : Replace this with call to RandomiseToy
 	RandomiseToy();
+	bCanBePickedUp = true;
 }
 
 // Called every frame
@@ -75,10 +76,11 @@ void AToy::RandomiseToy()
 void AToy::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	FString triggerName = FString(*OtherActor->GetName());
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
 	if (triggerName.Contains("TRASH"))
 	{
-		this->Destroy();
+		gamemode->DestroyToy(this);
 	}
 }
 

@@ -116,8 +116,9 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 	AToy* OverlapToy = Cast<AToy>(OtherActor);
 
-	if (OverlapToy != nullptr) {
-		PickUpToy(OverlapToy);
+	if (!OverlappedToys.Contains(OverlapToy) && OverlapToy != CurrentToy)
+	{
+		OverlappedToys.Add(OverlapToy);
 	}
 
 	if (triggerName.Contains("GREEN"))
@@ -145,15 +146,17 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	{
 		gamemode->DestroyToy(CurrentToy);
 	}
-	else if (triggerName.Contains("krampus"))
-	{
-		gamemode->DamageElf();
-	}
 }
 
 void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	AToy* OverlapToy = Cast<AToy>(OtherActor);
+
+	if (OverlappedToys.Contains(OverlapToy))
+	{
+		OverlappedToys.Remove(OverlapToy);
+	}
+
 	MachineOverlap = (int32)EMachineColour::eColourMax;
 	bDeliveryOverlap = false;
-	CurrentToy = nullptr;
 }

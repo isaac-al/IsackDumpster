@@ -42,6 +42,8 @@ public:
 
 	bool bRepairingMachine = false;
 
+	TArray<AToy*> OverlappedToys;
+
 	UPROPERTY()
 	AToy* CurrentToy = nullptr;
 

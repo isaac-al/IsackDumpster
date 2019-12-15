@@ -60,7 +60,8 @@ void AJinglePlayerController::ActionPressed()
 void AJinglePlayerController::ActionReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	if (Elf->CurrentToy != nullptr) {
+	
+	if (Elf->CurrentToy) {
 		if (Elf->MachineOverlap != EMachineColour::eColourMax)
 		{
 			switch (Elf->MachineOverlap)
@@ -80,18 +81,19 @@ void AJinglePlayerController::ActionReleased()
 			default:
 				break;
 			}
-		}
-		else if (Elf->CurrentToy->bCanBePickedUp)
-		{
-			Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
-			Elf->CurrentToy->MovementSpeed = 0.0f;
-		}
+		}		
 	}
-	else 
+	else if (Elf->OverlappedToys.Num() > 0 && Elf->OverlappedToys[0]->bCanBePickedUp && !Elf->CurrentToy)
 	{
+		FAttachmentTransformRules attach = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
+		attach.bWeldSimulatedBodies = true;
+		Elf->CurrentToy = Elf->OverlappedToys[0];
+		Elf->CurrentToy->AttachToActor(Elf, attach, "R_Arm_Hand");
+		Elf->CurrentToy->MovementSpeed = 0.0f;
 
+		Elf->OverlappedToys.Remove(Elf->CurrentToy);
 	}
-
+	
 	Elf->bRepairingMachine = false;
 }
 
@@ -107,6 +109,7 @@ void AJinglePlayerController::DropReleased()
 			Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X, currentLocation.Y, 0.0f));
 			Elf->CurrentToy->SetActorRotation(FRotator::ZeroRotator);
 			Elf->MachineOverlap = EMachineColour::eColourMax;
+			Elf->OverlappedToys.Add(Elf->CurrentToy);
 			Elf->CurrentToy = nullptr;
 		}
 	}

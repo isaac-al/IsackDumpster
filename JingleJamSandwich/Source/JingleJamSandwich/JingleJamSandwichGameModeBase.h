@@ -95,7 +95,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float ElfHealthNormal = 0.0f;
 
-
 	UPROPERTY(BlueprintReadOnly)
 	float GameTimer = GAME_TIME;
 
@@ -107,6 +106,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 Score = 0;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FString> ListNames;
 
 	FMachine Machines[NUM_MACHINES];
 	float DeltaTime = 0.0f;
