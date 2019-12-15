@@ -16,7 +16,7 @@ AElf::AElf()
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
 	CapsuleComp->SetCapsuleHalfHeight(500.0f);
-	CapsuleComp->SetCapsuleRadius(200.0f);
+	CapsuleComp->SetCapsuleRadius(100.0f);
 	CapsuleComp->SetGenerateOverlapEvents(true);
 	RootComponent = mesh;
 	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
@@ -81,6 +81,15 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 	FString LHS = "";
 	FString RHS = "";
+
+	AToy* OverlapToy = Cast<AToy>(OtherActor);
+	if (OverlapToy != nullptr) {
+
+		CurrentToy = OverlapToy;
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString("TOY: " + triggerName));
+		CurrentToy->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
+		CurrentToy->MovementSpeed = 0.0f;
+	}
 
 	triggerName.Split("_", &LHS, &RHS);
 

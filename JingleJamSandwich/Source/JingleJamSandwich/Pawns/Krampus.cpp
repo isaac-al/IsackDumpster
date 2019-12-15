@@ -16,7 +16,7 @@ AKrampus::AKrampus()
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
 	CapsuleComp->SetCapsuleHalfHeight(500.0f);
-	CapsuleComp->SetCapsuleRadius(200.0f);
+	CapsuleComp->SetCapsuleRadius(100.0f);
 	CapsuleComp->SetGenerateOverlapEvents(true);
 	RootComponent = mesh;
 	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));

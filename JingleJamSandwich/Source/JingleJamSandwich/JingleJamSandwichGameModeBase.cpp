@@ -72,7 +72,6 @@ void AJingleJamSandwichGameModeBase::Pause()
 			pc->SetInputMode(input);
 		}
 	}
-
 	bPleaseOpenPauseThanks = true;
 	GameState = ePaused;
 }
