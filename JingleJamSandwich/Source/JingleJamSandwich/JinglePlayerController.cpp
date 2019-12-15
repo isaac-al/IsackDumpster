@@ -89,11 +89,13 @@ void AJinglePlayerController::ActionReleased()
 			gamemode->AudioComponent->SetSound(gamemode->ItemPickUpCue);
 			gamemode->AudioComponent->Play();
 		}
-		else if(Elf->MachineOverlap != 4 && gamemode->Machines[Elf->MachineOverlap].Broken)
-		{
-				Elf->bRepairingMachine = false;
-		}
 	}
+	else 
+	{
+
+	}
+
+	Elf->bRepairingMachine = false;
 }
 
 void AJinglePlayerController::DropReleased()
