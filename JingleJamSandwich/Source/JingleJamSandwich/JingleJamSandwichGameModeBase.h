@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include <Sound/SoundCue.h>
 #include "JingleJamSandwichGameModeBase.generated.h"
 
 class AToy;
 class AElf;
 class AKrampus;
+class UAudioComponent;
 
 #define GAME_TIME 200.0f
 #define ELF_HEALTH_MAX 3
@@ -68,6 +70,19 @@ public:
 	AElf* Elf; 
 	AKrampus* Krampus;
 
+	USoundCue* SabotageCue = nullptr;
+	USoundCue* FixingCue = nullptr;
+	USoundCue* FixCompleteCue = nullptr;
+	USoundCue* DeliveredCue = nullptr;
+	USoundCue* ItemPickUpCue = nullptr;
+	USoundCue* KrampusAttackQue = nullptr;
+	USoundCue* LifeLostQue = nullptr;
+	USoundCue* PaintItemQue = nullptr;
+	USoundCue* PauseQue = nullptr;
+	USoundCue* ScribbleOutCue = nullptr;
+
+	UAudioComponent* AudioComponent = nullptr;
+
 	EState GameState;
 	TArray<FToyItem> ItemList;
 	
@@ -79,6 +94,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	float ElfHealthNormal = 0.0f;
+
 
 	UPROPERTY(BlueprintReadOnly)
 	float GameTimer = GAME_TIME;
@@ -99,6 +115,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
+
+	void LoadAudio();
 
 	UFUNCTION(BlueprintCallable)
 	void Pause();
