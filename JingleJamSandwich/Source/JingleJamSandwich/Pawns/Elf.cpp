@@ -87,42 +87,38 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
 
-	FString LHS = "";
-	FString RHS = "";
-
 	AToy* OverlapToy = Cast<AToy>(OtherActor);
+
 	if (OverlapToy != nullptr) {
 		PickUpToy(OverlapToy);
 	}
 
-	triggerName.Split("_", &LHS, &RHS);
-
-	if (RHS.Contains("GREEN"))
+	if (triggerName.Contains("GREEN"))
 	{
 		MachineOverlap = (int32)EMachineColour::eGreen;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eGreen);
 	}
-	else if (RHS.Contains("RED"))
+	else if (triggerName.Contains("RED"))
 	{
 		MachineOverlap = (int32)EMachineColour::eRed;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eRed);
 	}
-	else if (RHS.Contains("BLUE"))
+	else if (triggerName.Contains("BLUE"))
 	{
 		MachineOverlap = (int32)EMachineColour::eBlue;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eBlue);
 	}
-	else if (RHS.Contains("YELLOW"))
+	else if (triggerName.Contains("YELLOW"))
 	{
 		MachineOverlap = (int32)EMachineColour::eYellow;
 		gamemode->PaintToy(CurrentToy, EMachineColour::eYellow);
 	}
-	else if (RHS.Contains("DELIVER"))
+	else if (triggerName.Contains("DELIVER"))
 	{
 		bDeliveryOverlap = true;
 		gamemode->DeliverToy(CurrentToy);
 	}
-	else if (RHS.Contains("TRASH"))
+	else if (triggerName.Contains("TRASH"))
 	{
 		gamemode->DestroyToy(CurrentToy);
 	}

@@ -96,6 +96,7 @@ void AJinglePlayerController::KrampusActionReleased()
 	if (Krampus->bElfOverlap)
 	{
 		gamemode->DamageElf();
+		Krampus->bElfOverlap = false;
 	}
 	else if (Krampus->MachineOverlap < (int32)EMachineColour::eColourMax)
 	{
