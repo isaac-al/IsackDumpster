@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
 
+	UPROPERTY(BlueprintReadWrite)
+	float Speed = 0.0f;
+
 	bool bRepairingMachine = false;
 
 	UPROPERTY()
