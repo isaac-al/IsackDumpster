@@ -79,6 +79,16 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
 
+	AToy* OverlapToy = Cast<AToy>(OtherActor);
+
+	if (OverlapToy != nullptr) {
+
+		CurrentToy = OverlapToy;
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString("TOY: " + triggerName));
+		CurrentToy->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
+		CurrentToy->MovementSpeed = 0.0f;
+	}
+
 	if (triggerName.Contains("GREEN"))
 	{
 		MachineOverlap = (int32)EMachineColour::eGreen;

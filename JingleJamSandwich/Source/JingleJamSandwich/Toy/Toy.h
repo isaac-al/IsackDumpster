@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "JingleJamSandwichGameModeBase.h"
+#include <Components/BoxComponent.h>
 #include "Toy.generated.h"
 
 UCLASS()
@@ -28,6 +29,8 @@ public:
 	void LoadMesh(FString MeshName);
 
 	float MovementSpeed = 100.0f;
+
+	UBoxComponent* BoxComponent;
 
 	UStaticMeshComponent* mesh;
 	FString materialType;
