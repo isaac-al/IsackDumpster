@@ -6,6 +6,7 @@
 #include <ConstructorHelpers.h>
 #include "JingleJamSandwichGameModeBase.h"
 #include <Components/BoxComponent.h>
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 AToy::AToy()
@@ -15,6 +16,7 @@ AToy::AToy()
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TestMesh"));
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollider"));
 	BoxComponent->SetGenerateOverlapEvents(true);
+
 	BoxComponent->SetupAttachment(mesh, FName("BoxCollider"));
 }
 
@@ -22,7 +24,7 @@ AToy::AToy()
 void AToy::BeginPlay()
 {
 	Super::BeginPlay();
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, FString("Toy boi"));
+	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AToy::OnOverlapBegin);
 	//TO DO : Replace this with call to RandomiseToy
 	RandomiseToy();
 }
@@ -66,6 +68,16 @@ void AToy::RandomiseToy()
 	}
 
 	itemType = chosenToy;
+}
+
+void AToy::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	FString triggerName = FString(*OtherActor->GetName());
+
+	if (triggerName.Contains("TRASH"))
+	{
+		this->Destroy();
+	}
 }
 
 void AToy::LoadMesh(FString MeshName)
