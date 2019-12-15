@@ -37,6 +37,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
 
+	bool bRepairingMachine = false;
+
 	UPROPERTY()
 	AToy* CurrentToy = nullptr;
 

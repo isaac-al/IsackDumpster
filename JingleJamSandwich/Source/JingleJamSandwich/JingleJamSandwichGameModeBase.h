@@ -46,7 +46,7 @@ struct FToyItem
 struct FMachine
 {
 	EMachineColour Colour;
-	float RepairTime = 0.0f;
+	float RepairTime = 5.0f;
 	bool Broken = false;
 };
 
