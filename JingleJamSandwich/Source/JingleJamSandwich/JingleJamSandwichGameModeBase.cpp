@@ -46,8 +46,6 @@ void AJingleJamSandwichGameModeBase::StartGame()
 
 	GameState = ePlaying;
 
-	SpawnToy();
-
 	bPleaseOpenMainThanks = false;
 	bPleaseOpenGameOverThanks = false;
 	// TODO: Display HUD

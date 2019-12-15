@@ -12,16 +12,25 @@
 // Sets default values
 AElf::AElf()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	//mesh->SetSimulatePhysics(true);
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
-	CapsuleComp->SetCapsuleHalfHeight(100.0f);
-	CapsuleComp->SetCapsuleRadius(50.0f);
+	CapsuleComp->SetCapsuleHalfHeight(30.0f);
+	CapsuleComp->SetCapsuleRadius(60.0f);
+	//RootComponent = mesh;
+	mesh->SetupAttachment(CapsuleComp, FName("MeshFella"));
+	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	CapsuleComp->SetGenerateOverlapEvents(true);
-	RootComponent = mesh;
-	CapsuleComp->SetupAttachment(mesh, FName("Capsule"));
-	
+
+	CapsuleComp->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
+
+	CapsuleComp->CanCharacterStepUpOn = ECB_No;
+	CapsuleComp->SetSimulatePhysics(true);
+	CapsuleComp->SetEnableGravity(false);
+	RootComponent = CapsuleComp;
+
 	LoadMesh();
 }
 
@@ -30,22 +39,31 @@ void AElf::BeginPlay()
 {
 	Super::BeginPlay();
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AElf::OnOverlapBegin);
+
+	CurrentLocation = GetActorLocation();
+	CurrentRotation = GetActorRotation();
+
 }
 
 // Called every frame
 void AElf::Tick(float DeltaTime)
 {
+	CapsuleComp->SetPhysicsLinearVelocity(FVector::ZeroVector);
+	CapsuleComp->SetPhysicsAngularVelocity(FVector::ZeroVector);
 	Super::Tick(DeltaTime);
 	//GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("ELF Velocity"));
 	//if we have movement
 	if (!Velocity.IsZero())
 	{
-		FVector NewLocation = GetActorLocation() + (Velocity * DeltaTime);
-		FVector lookat = NewLocation;
-		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), NewLocation);
-		SetActorLocation(NewLocation);
-		SetActorRotation(NewRotation);
+		CurrentLocation = GetActorLocation() + (Velocity * DeltaTime);
+		FVector lookat = CurrentLocation;
+		CurrentRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CurrentLocation);
 	}
+
+
+	SetActorLocation(CurrentLocation);
+
+	mesh->SetRelativeRotation(CurrentRotation);
 }
 
 void AElf::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

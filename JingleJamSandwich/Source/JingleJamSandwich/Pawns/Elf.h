@@ -31,14 +31,14 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* mesh;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
 
 	UPROPERTY()
-		AToy* CurrentToy = nullptr;
+	AToy* CurrentToy = nullptr;
 
 	UFUNCTION(BlueprintCallable)
 	void LoadMesh();
@@ -60,5 +60,6 @@ public:
 
 private:
 
-
+	FVector CurrentLocation;
+	FRotator CurrentRotation;
 };
