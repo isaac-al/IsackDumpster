@@ -27,7 +27,7 @@ void AToy::BeginPlay()
 void AToy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FVector NewLocation = GetActorLocation() + (FVector(0, MovementSpeed, 0) * DeltaTime);
+	FVector NewLocation = GetActorLocation() + (FVector(-MovementSpeed, 0, 0) * DeltaTime);
 	SetActorLocation(NewLocation);
 }
 

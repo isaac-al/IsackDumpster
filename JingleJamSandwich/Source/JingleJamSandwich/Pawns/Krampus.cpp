@@ -78,28 +78,23 @@ void AKrampus::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Other
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
 
-	FString LHS = "";
-	FString RHS = "";
-
-	triggerName.Split("_", &LHS, &RHS);
-
-	if (RHS.Contains("GREEN"))
+	if (triggerName.Contains("GREEN"))
 	{
 		MachineOverlap = (int32)EMachineColour::eGreen;
 	}
-	else if (RHS.Contains("RED"))
+	else if (triggerName.Contains("RED"))
 	{
 		MachineOverlap = (int32)EMachineColour::eRed;
 	}
-	else if (RHS.Contains("BLUE"))
+	else if (triggerName.Contains("BLUE"))
 	{
 		MachineOverlap = (int32)EMachineColour::eBlue;
 	}
-	else if (RHS.Contains("YELLOW"))
+	else if (triggerName.Contains("YELLOW"))
 	{
 		MachineOverlap = (int32)EMachineColour::eYellow;
 	}
-	else if (RHS.Contains("ELF"))
+	else if (triggerName.Contains("ELF"))
 	{
 		bElfOverlap = true;
 	}
