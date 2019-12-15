@@ -14,6 +14,9 @@
 #include <JingleJamSandwich\Pawns\Krampus.h>
 #include <DefaultPawnOverride.h>
 #include <Materials/MaterialInstance.h>
+#include <Particles/Emitter.h>
+#include <Particles/ParticleEmitter.h>
+#include <Particles/ParticleSystemComponent.h>
 
 AJingleJamSandwichGameModeBase::AJingleJamSandwichGameModeBase()
 {
@@ -248,6 +251,35 @@ void AJingleJamSandwichGameModeBase::ChangeMaterial(FString MaterialName, AToy* 
 void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour)
 {
 	Machines[(int32)InMachineColour].Broken = true;
+	TArray<AActor*> Emitters;
+	TSubclassOf<AEmitter> Emitter;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEmitter::StaticClass(), Emitters);
+	FString CurrentMachineColour;
+	switch (InMachineColour)
+	{
+	case eRed:
+		CurrentMachineColour = "Red";
+		break;
+	case eBlue:
+		CurrentMachineColour = "Blue";
+		break;
+	case eGreen:
+		CurrentMachineColour = "Green";
+		break;
+	case eYellow:
+		CurrentMachineColour = "Yellow";
+		break;
+	default:
+		CurrentMachineColour = "";
+		break;
+	}
+	for(int i = 0; i < Emitters.Num(); i++){
+		FString EmitterName = Emitters[i]->GetFullName();
+		if (EmitterName.Contains(CurrentMachineColour)) {
+			UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
+			particle->ActivateSystem();
+		}
+	}
 }
 
 void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColour)
@@ -279,6 +311,17 @@ void AJingleJamSandwichGameModeBase::BeginPlay()
 	TSubclassOf<AElf> elf;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AElf::StaticClass(), Elves);
 	Elf = Cast<AElf>(Elves[0]);
+
+	TArray<AActor*> Emitters;
+	TSubclassOf<AEmitter> emitter;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEmitter::StaticClass(), Emitters);
+	for (int i = 0; i < Emitters.Num(); i++) {
+		FString EmitterName = Emitters[i]->GetFullName();
+		if (EmitterName.Contains("Fire") == false) {
+			UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
+			particle->DeactivateSystem();
+		}
+	}
 
 	Reset();
 }
