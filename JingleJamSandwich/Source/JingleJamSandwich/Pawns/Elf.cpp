@@ -100,22 +100,18 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	if (triggerName.Contains("GREEN"))
 	{
 		MachineOverlap = (int32)EMachineColour::eGreen;
-		gamemode->PaintToy(CurrentToy, EMachineColour::eGreen);
 	}
 	else if (triggerName.Contains("RED"))
 	{
 		MachineOverlap = (int32)EMachineColour::eRed;
-		gamemode->PaintToy(CurrentToy, EMachineColour::eRed);
 	}
 	else if (triggerName.Contains("BLUE"))
 	{
 		MachineOverlap = (int32)EMachineColour::eBlue;
-		gamemode->PaintToy(CurrentToy, EMachineColour::eBlue);
 	}
 	else if (triggerName.Contains("YELLOW"))
 	{
 		MachineOverlap = (int32)EMachineColour::eYellow;
-		gamemode->PaintToy(CurrentToy, EMachineColour::eYellow);
 	}
 	else if (triggerName.Contains("DELIVER"))
 	{

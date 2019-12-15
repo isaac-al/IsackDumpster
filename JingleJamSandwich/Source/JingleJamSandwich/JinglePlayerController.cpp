@@ -49,11 +49,32 @@ void AJinglePlayerController::SetupInputComponent()
 void AJinglePlayerController::ActionReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-	if (Elf->CurrentToy != nullptr && Elf->CurrentToy->bCanBePickedUp) 
-	{
-		Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
-		Elf->CurrentToy->MovementSpeed = 0.0f;
+	if (Elf->CurrentToy != nullptr) {
+		if (Elf->MachineOverlap != EMachineColour::eColourMax)
+		{
+			switch (Elf->MachineOverlap)
+			{
+			case 0:
+				gamemode->PaintToy(Elf->CurrentToy, EMachineColour::eRed);
+				break;
+			case 1:
+				gamemode->PaintToy(Elf->CurrentToy, EMachineColour::eBlue);
+				break;
+			case 2:
+				gamemode->PaintToy(Elf->CurrentToy, EMachineColour::eGreen);
+				break;
+			case 3:
+				gamemode->PaintToy(Elf->CurrentToy, EMachineColour::eYellow);
+				break;
+			default:
+				break;
+			}
+		}
+		else if (Elf->CurrentToy->bCanBePickedUp)
+		{
+			Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
+			Elf->CurrentToy->MovementSpeed = 0.0f;
+		}
 	}
 }
 
@@ -66,6 +87,7 @@ void AJinglePlayerController::DropReleased()
 		Elf->CurrentToy->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		FVector currentLocation = Elf->CurrentToy->GetActorLocation();
 		Elf->CurrentToy->SetActorLocation(FVector(currentLocation.X, currentLocation.Y, 0.0f));
+		Elf->MachineOverlap = EMachineColour::eColourMax;
 		Elf->CurrentToy = nullptr;
 	}
 }
