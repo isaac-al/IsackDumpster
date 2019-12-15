@@ -9,6 +9,7 @@
 #include <JingleJamSandwich\Pawns\Krampus.h>
 #include <JingleJamSandwich\Pawns\Elf.h>
 #include <JingleJamSandwich\Toy\Toy.h>
+#include <Components/AudioComponent.h>
 
 void AJinglePlayerController::BeginPlay()
 {
@@ -85,12 +86,16 @@ void AJinglePlayerController::ActionReleased()
 		{
 			Elf->CurrentToy->AttachToActor(Elf, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
 			Elf->CurrentToy->MovementSpeed = 0.0f;
-		}
-		else if(Elf->MachineOverlap != 4 && gamemode->Machines[Elf->MachineOverlap].Broken)
-		{
-				Elf->bRepairingMachine = false;
+			gamemode->AudioComponent->SetSound(gamemode->ItemPickUpCue);
+			gamemode->AudioComponent->Play();
 		}
 	}
+	else 
+	{
+
+	}
+
+	Elf->bRepairingMachine = false;
 }
 
 void AJinglePlayerController::DropReleased()
@@ -137,6 +142,8 @@ void AJinglePlayerController::KrampusActionReleased()
 void AJinglePlayerController::KrampusActionPressed()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	gamemode->AudioComponent->SetSound(gamemode->KrampusAttackQue);
+	gamemode->AudioComponent->Play();
 	if (Krampus->bElfOverlap)
 	{
 		gamemode->DamageElf();

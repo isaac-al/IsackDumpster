@@ -17,12 +17,14 @@
 #include <Particles/Emitter.h>
 #include <Particles/ParticleEmitter.h>
 #include <Particles/ParticleSystemComponent.h>
+#include <Components/AudioComponent.h>
 
 AJingleJamSandwichGameModeBase::AJingleJamSandwichGameModeBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	DefaultPawnClass = ADefaultPawnOverride::StaticClass();
 	PlayerControllerClass = AJinglePlayerController::StaticClass();
+	LoadAudio();
 }
 
 void AJingleJamSandwichGameModeBase::StartGame()
@@ -57,11 +59,28 @@ void AJingleJamSandwichGameModeBase::StartGame()
 	// check it twice
 }
 
+void AJingleJamSandwichGameModeBase::LoadAudio()
+{
+	FixingCue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/FixingCue.FixingCue'"));
+	FixCompleteCue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/FixCompletedCue.FixCompletedCue'"));
+	SabotageCue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/SabotageCue.SabotageCue'"));
+	DeliveredCue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/DeliverCue.DeliverCue'"));
+	ItemPickUpCue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/Item_Pickup_Cue.Item_Pickup_Cue'"));
+	KrampusAttackQue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/Krampus_Attack_Cue.Krampus_Attack_Cue'"));
+	LifeLostQue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/Life_Lost_Cue.Life_Lost_Cue'"));
+	PaintItemQue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/Paint_Item_Cue.Paint_Item_Cue'"));
+	PauseQue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/Pause_Cue.Pause_Cue'"));
+	ScribbleOutCue = LoadObject<USoundCue>(NULL, *FString("SoundCue'/Game/Sounds/Scribble_Out_Item_Cue.Scribble_Out_Item_Cue'"));
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));                        
+	AudioComponent->SetupAttachment(RootComponent);
+}
+
 void AJingleJamSandwichGameModeBase::Pause()
 {
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), jingleController, controllers);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -75,6 +94,8 @@ void AJingleJamSandwichGameModeBase::Pause()
 			pc->SetInputMode(input);
 		}
 	}
+	AudioComponent->SetSound(PauseQue);
+	AudioComponent->Play();
 	bPleaseOpenPauseThanks = true;
 	GameState = ePaused;
 }
@@ -83,7 +104,7 @@ void AJingleJamSandwichGameModeBase::Resume()
 {
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), jingleController, controllers);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -106,7 +127,7 @@ void AJingleJamSandwichGameModeBase::BackToMenu()
 	// iterate through players
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), jingleController, controllers);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
 
 	for (int32 i = 0; i < controllers.Num(); i++)
 	{
@@ -136,7 +157,7 @@ void AJingleJamSandwichGameModeBase::Restart()
 
 void AJingleJamSandwichGameModeBase::SpawnToy()
 {
-	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector(46.468418f, 899.603516f, 212.685196f), FRotator::ZeroRotator);
+	GetWorld()->SpawnActor<AToy>(AToy::StaticClass(), FVector(59.542191f, 862.792236f, 147.721680f), FRotator::ZeroRotator);
 }
 
 void AJingleJamSandwichGameModeBase::DamageElf()
@@ -161,7 +182,7 @@ void AJingleJamSandwichGameModeBase::MakeList()
 	for (int32 i = 0; i < 4; ++i)
 	{
 		FToyItem item;
-		item.ItemType = FMath::RandRange(1, 8);
+		item.ItemType = FMath::RandRange(1, 7);
 		item.colour = (EMachineColour)FMath::RandRange(0, 3);
 		ItemList.Add(item);
 	}
@@ -173,20 +194,25 @@ void AJingleJamSandwichGameModeBase::PaintToy(AToy* InToy, EMachineColour InColo
 		// TODO: set mesh colour
 		if (InToy && InToy->IsValidLowLevel())
 		{
+			AudioComponent->SetSound(PaintItemQue);
 			InToy->colour = InColour;
 			switch (InColour)
 			{
 			case eRed:
 				ChangeMaterial("Red", InToy);
+				AudioComponent->Play();
 				break;
 			case eBlue:
 				ChangeMaterial("Blue", InToy);
+				AudioComponent->Play();
 				break;
 			case eGreen:
 				ChangeMaterial("Green", InToy);
+				AudioComponent->Play();
 				break;
 			case eYellow:
 				ChangeMaterial("Yellow", InToy);
+				AudioComponent->Play();
 				break;
 			default:
 				break;
@@ -207,7 +233,8 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 		if (itemType == ItemList[i].ItemType &&
 			toyColour == ItemList[i].colour)
 		{
-			Delivered->Play();
+			AudioComponent->SetSound(DeliveredCue);
+			AudioComponent->Play();
 			ItemList.RemoveAt(i);
 			validToy = true;
 			Score += DELIVER_POINTS;
@@ -217,6 +244,8 @@ void AJingleJamSandwichGameModeBase::DeliverToy(AToy* InToy)
 			Elf->CurrentToy->MovementSpeed = 100.0f;
 			Elf->CurrentToy->bCanBePickedUp = false;
 			Elf->CurrentToy = nullptr;
+			AudioComponent->SetSound(ScribbleOutCue);
+			AudioComponent->Play();
 			break;
 		}
 	}
@@ -277,7 +306,8 @@ void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour
 	for(int i = 0; i < Emitters.Num(); i++){
 		FString EmitterName = Emitters[i]->GetFullName();
 		if (EmitterName.Contains(CurrentMachineColour)) {
-			Sabotage->Play();
+			AudioComponent->SetSound(SabotageCue);
+			AudioComponent->Play();
 			UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
 			particle->ActivateSystem();
 		}
@@ -286,9 +316,14 @@ void AJingleJamSandwichGameModeBase::BreakMachine(EMachineColour InMachineColour
 
 void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColour)
 {
-	if (Machines[(int32)InMachineColour].Broken == true) {
+	if (Machines[(int32)InMachineColour].Broken == true) 
+	{
 		Machines[(int32)InMachineColour].RepairTime += DeltaTime;
-		Fixing->Play();
+		RepairTime = Machines[(int32)InMachineColour].RepairTime / MAX_REPAIR_TIME;
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("repair time normal: " + FString::SanitizeFloat(RepairTime)));
+
+		AudioComponent->SetSound(FixingCue);
+		AudioComponent->Play();
 		RepairTime = Machines[(int32)InMachineColour].RepairTime;
 
 		if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
@@ -321,8 +356,9 @@ void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColou
 				FString EmitterName = Emitters[i]->GetFullName();
 				if (EmitterName.Contains(CurrentMachineColour)) {
 					UParticleSystemComponent* particle = Cast<UParticleSystemComponent>(Emitters[i]->GetComponentByClass(UParticleSystemComponent::StaticClass()));
-					Fixing->Stop();
-					FixComplete->Play();
+					AudioComponent->Stop();
+					AudioComponent->SetSound(FixCompleteCue);
+					AudioComponent->Play();
 					particle->DeactivateSystem();
 				}
 			}
@@ -336,11 +372,6 @@ void AJingleJamSandwichGameModeBase::BeginPlay()
 	bPleaseOpenMainThanks = true;
 	bPleaseOpenPauseThanks = false;
 	bPleaseOpenGameOverThanks = false;
-
-	Fixing = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/Fixing.Fixing'"));
-	FixComplete = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/FixCompleted.FixCompleted'"));
-	Sabotage = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/Sabotage.Sabotage'"));
-	Delivered = LoadObject<UAudioComponent>(NULL, *FString("AudioComponent'/Game/Sounds/Deliver.Deliver'"));
 
 
 	TArray<AActor*> Krampai;
@@ -410,6 +441,22 @@ void AJingleJamSandwichGameModeBase::UpdateMainMenu()
 {
 	bShowHUD = false;
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("MAIN MENU"));
+	TArray<AActor*> controllers;
+	TSubclassOf<AJinglePlayerController> jingleController;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
+
+	for (int32 i = 0; i < controllers.Num(); i++)
+	{
+		AJinglePlayerController* pc = Cast<AJinglePlayerController>(controllers[i]);
+
+		if (pc && pc->IsValidLowLevel())
+		{
+			FInputModeGameAndUI input;
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			pc->bShowMouseCursor = true;
+			pc->SetInputMode(input);
+		}
+	}
 
 }
 
@@ -426,6 +473,23 @@ void AJingleJamSandwichGameModeBase::UpdateWonState()
 
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("You wonned"));
+	TArray<AActor*> controllers;
+	TSubclassOf<AJinglePlayerController> jingleController;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
+
+	for (int32 i = 0; i < controllers.Num(); i++)
+	{
+		AJinglePlayerController* pc = Cast<AJinglePlayerController>(controllers[i]);
+
+		if (pc && pc->IsValidLowLevel())
+		{
+			FInputModeGameAndUI input;
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			pc->bShowMouseCursor = true;
+			pc->SetInputMode(input);
+		}
+	}
+
 }
 
 void AJingleJamSandwichGameModeBase::UpdateLossState()
@@ -434,6 +498,22 @@ void AJingleJamSandwichGameModeBase::UpdateLossState()
 	bPleaseOpenGameOverThanks = true;
 	Reset();
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("YOU LOST MEGABITCH"));
+	TArray<AActor*> controllers;
+	TSubclassOf<AJinglePlayerController> jingleController;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
+
+	for (int32 i = 0; i < controllers.Num(); i++)
+	{
+		AJinglePlayerController* pc = Cast<AJinglePlayerController>(controllers[i]);
+
+		if (pc && pc->IsValidLowLevel())
+		{
+			FInputModeGameAndUI input;
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			pc->bShowMouseCursor = true;
+			pc->SetInputMode(input);
+		}
+	}
 }
 
 void AJingleJamSandwichGameModeBase::UpdateGame()
@@ -458,7 +538,7 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 	if (ToyCooldown <= 0.0f)
 	{
 		SpawnToy();
-		ToyCooldown = FMath::RandRange(1, 10);
+		ToyCooldown = FMath::RandRange(2, 5);
 	}
 
 	for (int item = 0; item < ItemList.Num(); ++item)
@@ -482,6 +562,8 @@ void AJingleJamSandwichGameModeBase::Reset()
 void AJingleJamSandwichGameModeBase::KillElf()
 {
 	--ElfLives;
+	AudioComponent->SetSound(LifeLostQue);
+	AudioComponent->Play();
 	ElfHealth = ELF_HEALTH_MAX;
 
 	if (ElfLives <= 0)

@@ -49,7 +49,7 @@ public:
 	void LoadMesh();
 
 	FVector Velocity = FVector::ZeroVector;
-	float SpeedModifier = 250.0f;
+	float SpeedModifier = 400.0f;
 	int32 MachineOverlap = 4;
 	bool bDeliveryOverlap = false;
 
