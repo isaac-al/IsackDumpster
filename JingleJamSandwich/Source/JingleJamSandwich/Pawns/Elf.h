@@ -37,6 +37,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
 
+	UPROPERTY()
+		AToy* CurrentToy = nullptr;
+
 	UFUNCTION(BlueprintCallable)
 	void LoadMesh();
 
@@ -47,6 +50,8 @@ public:
 	void MoveX(float amount);
 	void MoveY(float amount);
 
+	void PickUpToy(AToy* OverlapToy);
+
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
@@ -55,6 +60,5 @@ public:
 
 private:
 
-	UPROPERTY()
-	AToy* CurrentToy = nullptr;
+
 };

@@ -72,9 +72,16 @@ void AElf::MoveY(float amount)
 	Velocity.Y = FMath::Clamp(amount, -1.0f, 1.0f) * SpeedModifier;
 }
 
+void AElf::PickUpToy(AToy* OverlapToy)
+{
+	CurrentToy = OverlapToy;
+	//CurrentToy->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
+	//CurrentToy->MovementSpeed = 0.0f;
+}
+
 void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+w	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	FString triggerName = FString(*OtherActor->GetName());
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
@@ -84,11 +91,7 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 	AToy* OverlapToy = Cast<AToy>(OtherActor);
 	if (OverlapToy != nullptr) {
-
-		CurrentToy = OverlapToy;
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString("TOY: " + triggerName));
-		CurrentToy->AttachToActor(this, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "L_Arm_Hand");
-		CurrentToy->MovementSpeed = 0.0f;
+		PickUpToy(OverlapToy);
 	}
 
 	triggerName.Split("_", &LHS, &RHS);
@@ -128,4 +131,5 @@ void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 {
 	MachineOverlap = (int32)EMachineColour::eColourMax;
 	bDeliveryOverlap = false;
+	CurrentToy = nullptr;
 }
