@@ -29,6 +29,7 @@ public:
 	void PauseReleased();
 
 	void KrampusActionReleased();
+	void KrampusActionPressed();
 
 	void KrampusMoveX(float amount);
 	void KrampusMoveY(float amount);

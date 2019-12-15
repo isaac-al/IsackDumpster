@@ -37,6 +37,7 @@ void AJinglePlayerController::SetupInputComponent()
 	
 	InputComponent->BindAction("Action", EInputEvent::IE_Released, this, &AJinglePlayerController::ActionReleased);
 	InputComponent->BindAction("Action", EInputEvent::IE_Pressed, this, &AJinglePlayerController::ActionPressed);
+	InputComponent->BindAction("KrampusAction", EInputEvent::IE_Pressed, this, &AJinglePlayerController::KrampusActionPressed);
 	InputComponent->BindAction("KrampusAction", EInputEvent::IE_Released, this, &AJinglePlayerController::KrampusActionReleased);
 	InputComponent->BindAction("Drop", EInputEvent::IE_Released, this, &AJinglePlayerController::DropReleased);
 	InputComponent->BindAction("Pause", EInputEvent::IE_Released, this, &AJinglePlayerController::PauseReleased);
@@ -130,17 +131,22 @@ void AJinglePlayerController::PauseReleased()
 
 void AJinglePlayerController::KrampusActionReleased()
 {
+	Krampus->bAttack = false;
+}
+
+void AJinglePlayerController::KrampusActionPressed()
+{
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	
 	if (Krampus->bElfOverlap)
 	{
 		gamemode->DamageElf();
-		Krampus->bElfOverlap = false;
 	}
 	else if (Krampus->MachineOverlap < (int32)EMachineColour::eColourMax)
 	{
 		gamemode->BreakMachine((EMachineColour)Krampus->MachineOverlap);
 	}
+
+	Krampus->bAttack = true;
 }
 
 void AJinglePlayerController::KrampusMoveX(float amount)

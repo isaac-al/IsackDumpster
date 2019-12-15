@@ -40,6 +40,9 @@ void AKrampus::BeginPlay()
 
 	CurrentLocation = GetActorLocation();
 	CurrentRotation = GetActorRotation();
+
+	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AKrampus::OnOverlapBegin);
+	CapsuleComp->OnComponentEndOverlap.AddDynamic(this, &AKrampus::OnOverlapEnd);
 }
 
 // Called every frame
@@ -58,7 +61,13 @@ void AKrampus::Tick(float DeltaTime)
 	}
 
 	SetActorLocation(CurrentLocation);
-	mesh->SetRelativeRotation(CurrentRotation);
+
+	FRotator budge = FRotator::MakeFromEuler(FVector(0.0f, 0.0f, -90.0f));
+
+	mesh->SetRelativeRotation(CurrentRotation + budge);
+	Speed = Velocity.GetSafeNormal().Size() * 100.0f;
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString("KRAMPUS SPEED: " + FString::SanitizeFloat(Speed)));
 }
 
 // Called to bind functionality to input

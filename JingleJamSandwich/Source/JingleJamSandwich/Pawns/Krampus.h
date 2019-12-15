@@ -37,6 +37,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadMesh();
 
+	UPROPERTY(BlueprintReadWrite)
+	float Speed = 0.0f;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bAttack = false;
+
 	FVector Velocity;
 	float SpeedModifier = 250.0f;
 	int32 MachineOverlap = 4;

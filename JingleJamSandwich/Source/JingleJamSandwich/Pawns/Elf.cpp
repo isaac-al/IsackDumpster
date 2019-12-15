@@ -39,6 +39,7 @@ void AElf::BeginPlay()
 {
 	Super::BeginPlay();
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AElf::OnOverlapBegin);
+	CapsuleComp->OnComponentEndOverlap.AddDynamic(this, &AElf::OnOverlapEnd);
 
 	CurrentLocation = GetActorLocation();
 	CurrentRotation = GetActorRotation();
@@ -60,10 +61,14 @@ void AElf::Tick(float DeltaTime)
 		CurrentRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), CurrentLocation);
 	}
 
-
 	SetActorLocation(CurrentLocation);
 
-	mesh->SetRelativeRotation(CurrentRotation);
+	FRotator budge = FRotator::MakeFromEuler(FVector(0.0f, 0.0f, -90.0f));
+
+	mesh->SetRelativeRotation(CurrentRotation + budge);
+	Speed = Velocity.GetSafeNormal().Size() * 100.0f;
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString("KRAMPUS SPEED: " + FString::SanitizeFloat(Speed)));
 }
 
 void AElf::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
