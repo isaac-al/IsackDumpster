@@ -509,6 +509,8 @@ void AJingleJamSandwichGameModeBase::Reset()
 void AJingleJamSandwichGameModeBase::KillElf()
 {
 	--ElfLives;
+	AudioComponent->SetSound(LifeLostQue);
+	AudioComponent->Play();
 	ElfHealth = ELF_HEALTH_MAX;
 
 	if (ElfLives <= 0)
