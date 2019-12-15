@@ -32,6 +32,9 @@ public:
 
 	UBoxComponent* BoxComponent;
 
+	UFUNCTION()
+		void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 	UStaticMeshComponent* mesh;
 	FString materialType;
 	int32 itemType = 0;
