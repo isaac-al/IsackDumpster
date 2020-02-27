@@ -7,8 +7,6 @@
 #include "Toy/Toy.h"
 #include "Pawns/Elf.h"
 #include <Kismet/GameplayStatics.h>
-#include "Blueprint/UserWidget.h"
-#include <WidgetBlueprintLibrary.h>
 #include <GameFramework/PlayerController.h>
 #include <JingleJamSandwich\Pawns\Elf.h>
 #include <JingleJamSandwich\Pawns\Krampus.h>
@@ -153,7 +151,10 @@ void AJingleJamSandwichGameModeBase::Restart()
 	Reset();
 	bPleaseOpenPauseThanks = false;
 	bPleaseOpenGameOverThanks = false;
+	bPleaseOpenMainThanks = false;
 	GameState = ePlaying;
+	Elf->Restart();
+	Krampus->Restart();
 }
 
 void AJingleJamSandwichGameModeBase::SpawnToy()
@@ -268,8 +269,11 @@ void AJingleJamSandwichGameModeBase::DestroyToy(AToy* InToy)
 	{
 		if (Elf->CurrentToy == InToy)
 		{
-			InToy->Destroy();
+			Elf->CurrentToy = nullptr;
 		}
+
+		InToy->Destroy();
+
 	}
 }
 
@@ -324,11 +328,9 @@ void AJingleJamSandwichGameModeBase::RepairMachine(EMachineColour InMachineColou
 	{
 		Machines[(int32)InMachineColour].RepairTime += DeltaTime;
 		RepairTime = Machines[(int32)InMachineColour].RepairTime / MAX_REPAIR_TIME;
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("repair time normal: " + FString::SanitizeFloat(RepairTime)));
 
 		AudioComponent->SetSound(FixingCue);
 		AudioComponent->Play();
-		RepairTime = Machines[(int32)InMachineColour].RepairTime;
 
 		if (Machines[(int32)InMachineColour].RepairTime >= MAX_REPAIR_TIME)
 		{
@@ -444,7 +446,6 @@ void AJingleJamSandwichGameModeBase::Tick(float DeltaSeconds)
 void AJingleJamSandwichGameModeBase::UpdateMainMenu()
 {
 	bShowHUD = false;
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("MAIN MENU"));
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
@@ -467,16 +468,7 @@ void AJingleJamSandwichGameModeBase::UpdateMainMenu()
 void AJingleJamSandwichGameModeBase::UpdatePauseMenu()
 {
 	bShowHUD = false;
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("PAUSED"));
-}
 
-void AJingleJamSandwichGameModeBase::UpdateWonState()
-{
-	bShowHUD = false;
-	bPleaseOpenGameOverThanks = true;
-
-	Reset();
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("You wonned"));
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
@@ -496,12 +488,35 @@ void AJingleJamSandwichGameModeBase::UpdateWonState()
 
 }
 
+void AJingleJamSandwichGameModeBase::UpdateWonState()
+{
+	bShowHUD = false;
+	bPleaseOpenGameOverThanks = true;
+
+	Reset();
+	TArray<AActor*> controllers;
+	TSubclassOf<AJinglePlayerController> jingleController;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
+
+	for (int32 i = 0; i < controllers.Num(); i++)
+	{
+		AJinglePlayerController* pc = Cast<AJinglePlayerController>(controllers[i]);
+
+		if (pc && pc->IsValidLowLevel())
+		{
+			FInputModeGameAndUI input;
+			input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			pc->bShowMouseCursor = true;
+			pc->SetInputMode(input);
+		}
+	}
+}
+
 void AJingleJamSandwichGameModeBase::UpdateLossState()
 {
 	bShowHUD = false;
 	bPleaseOpenGameOverThanks = true;
 	Reset();
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("YOU LOST MEGABITCH"));
 	TArray<AActor*> controllers;
 	TSubclassOf<AJinglePlayerController> jingleController;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJinglePlayerController::StaticClass(), controllers);
@@ -525,8 +540,6 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 	GameTimer -= DeltaTime;
 	ElfHealthNormal = ((float)ElfHealth / (float)ELF_HEALTH_MAX);
 	bShowHUD = true;
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Time left: " + FString::SanitizeFloat(GameTimer)));
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, FString("Health left: " + FString::FromInt(ElfHealth)));
 
 	if (GameTimer <= 0.0f)
 	{
@@ -598,12 +611,7 @@ void AJingleJamSandwichGameModeBase::UpdateGame()
 		}
 
 		FString result = FString(colour.ToUpper() + " " + type.ToUpper());
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Yellow, result);
 		ListNames.Add(result);
-	}
-
-	for (int32 i = 0; i < ListNames.Num(); i++)
-	{
 	}
 }
 
@@ -622,6 +630,8 @@ void AJingleJamSandwichGameModeBase::Reset()
 void AJingleJamSandwichGameModeBase::KillElf()
 {
 	--ElfLives;
+	AudioComponent->SetSound(LifeLostQue);
+	AudioComponent->Play();
 	ElfHealth = ELF_HEALTH_MAX;
 
 	if (ElfLives <= 0)

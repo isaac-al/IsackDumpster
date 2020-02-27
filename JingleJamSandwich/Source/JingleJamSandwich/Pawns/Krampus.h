@@ -56,7 +56,12 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-private:
+	void Restart();
+
+	FVector StartLocation;
 	FVector CurrentLocation;
+	FRotator StartRotation;
 	FRotator CurrentRotation;
+private:
+
 };

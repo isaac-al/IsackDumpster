@@ -8,6 +8,7 @@
 #include "JingleJamSandwichGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "JingleMovementComponent.h"
 
 // Sets default values
 AElf::AElf()
@@ -41,9 +42,7 @@ void AElf::BeginPlay()
 	CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AElf::OnOverlapBegin);
 	CapsuleComp->OnComponentEndOverlap.AddDynamic(this, &AElf::OnOverlapEnd);
 
-	CurrentLocation = GetActorLocation();
-	CurrentRotation = GetActorRotation();
-
+	MovementComponent->Init(this);
 }
 
 // Called every frame
@@ -68,7 +67,6 @@ void AElf::Tick(float DeltaTime)
 	mesh->SetRelativeRotation(CurrentRotation + budge);
 	Speed = Velocity.GetSafeNormal().Size() * 100.0f;
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString("KRAMPUS SPEED: " + FString::SanitizeFloat(Speed)));
 }
 
 void AElf::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -112,7 +110,6 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	FString triggerName = FString(*OtherActor->GetName());
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
 
 	AToy* OverlapToy = Cast<AToy>(OtherActor);
 
@@ -150,6 +147,7 @@ void AElf::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActo
 
 void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	AToy* OverlapToy = Cast<AToy>(OtherActor);
 
 	if (OverlappedToys.Contains(OverlapToy))
@@ -157,6 +155,19 @@ void AElf::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		OverlappedToys.Remove(OverlapToy);
 	}
 
+	gamemode->RepairTime = 0.0f;
+
+	for (int32 i = 0; i < 4; i++)
+	{
+		gamemode->Machines[i].RepairTime = 0.0f;
+	}
+
 	MachineOverlap = (int32)EMachineColour::eColourMax;
 	bDeliveryOverlap = false;
+}
+
+void AElf::Restart()
+{
+	SetActorLocation(StartLocation);
+	SetActorRotation(StartRotation);
 }

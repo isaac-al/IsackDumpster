@@ -47,9 +47,11 @@ void AToy::RandomiseToy()
 	switch (chosenToy) {
 	case 1:
 		LoadMesh("Car");
+		mesh->SetWorldScale3D(FVector(1.5f, 1.5f, 1.5f));
 		break;
 	case 2:
 		LoadMesh("Bear");
+		mesh->SetWorldScale3D(FVector(1.5f, 1.5f, 1.5f));
 		break;
 	case 3:
 		LoadMesh("Ball");
@@ -59,12 +61,14 @@ void AToy::RandomiseToy()
 		break;
 	case 5:
 		LoadMesh("Game");
+		mesh->SetWorldScale3D(FVector(2.5f, 2.5f, 2.5f));
 		break;
 	case 6:
 		LoadMesh("Book");
 		break;
 	case 7:
 		LoadMesh("Robot");
+		mesh->SetWorldScale3D(FVector(1.5f, 1.5f, 1.5f));
 		break;
 	default:
 		break;
@@ -91,6 +95,5 @@ void AToy::LoadMesh(FString MeshName)
 	if (MeshAsset != nullptr)
 	{
 		mesh->SetStaticMesh(MeshAsset);
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, FString("Loaded Mesh"));
 	}
 }

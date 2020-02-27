@@ -9,6 +9,7 @@
 class UCapsuleComponent;
 class AToy;
 class AJingleJamSandwichGameModeBase;
+class UJingleMovementComponent;
 enum EMachineColour;
 
 UCLASS()
@@ -37,8 +38,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UCapsuleComponent* CapsuleComp;
 
-	UPROPERTY(BlueprintReadWrite)
-	float Speed = 0.0f;
+	UJingleMovementComponent* MovementComponent;
 
 	bool bRepairingMachine = false;
 
@@ -70,6 +70,8 @@ public:
 	
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void Restart();
 
 private:
 };

@@ -4,11 +4,10 @@
 #include "JinglePlayerController.h"
 #include "JingleJamSandwichGameModeBase.h"
 #include <Kismet/GameplayStatics.h>
-#include <WidgetBlueprintLibrary.h>
-#include <UserWidget.h>
 #include <JingleJamSandwich\Pawns\Krampus.h>
 #include <JingleJamSandwich\Pawns\Elf.h>
 #include <JingleJamSandwich\Toy\Toy.h>
+#include <Components/AudioComponent.h>
 
 void AJinglePlayerController::BeginPlay()
 {
@@ -51,6 +50,12 @@ void AJinglePlayerController::SetupInputComponent()
 void AJinglePlayerController::ActionPressed()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	
+	if (gamemode->GameState != EState::ePlaying)
+	{
+		return;
+	}
+
 	if (Elf->MachineOverlap != 4 && gamemode->Machines[Elf->MachineOverlap].Broken)
 	{
 		Elf->bRepairingMachine = true;
@@ -60,7 +65,12 @@ void AJinglePlayerController::ActionPressed()
 void AJinglePlayerController::ActionReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-	
+
+	if (gamemode->GameState != EState::ePlaying)
+	{
+		return;
+	}
+
 	if (Elf->CurrentToy) {
 		if (Elf->MachineOverlap != EMachineColour::eColourMax)
 		{
@@ -85,21 +95,36 @@ void AJinglePlayerController::ActionReleased()
 	}
 	else if (Elf->OverlappedToys.Num() > 0 && Elf->OverlappedToys[0]->bCanBePickedUp && !Elf->CurrentToy)
 	{
-		FAttachmentTransformRules attach = FAttachmentTransformRules::SnapToTargetNotIncludingScale;
-		attach.bWeldSimulatedBodies = true;
+		FAttachmentTransformRules attach = FAttachmentTransformRules::KeepWorldTransform;
 		Elf->CurrentToy = Elf->OverlappedToys[0];
-		Elf->CurrentToy->AttachToActor(Elf, attach, "R_Arm_Hand");
-		Elf->CurrentToy->MovementSpeed = 0.0f;
 
-		Elf->OverlappedToys.Remove(Elf->CurrentToy);
+		Elf->CurrentToy->MovementSpeed = 0.0f;
+		Elf->CurrentToy->SetActorLocation(FVector((Elf->GetActorLocation().X + 50.0f), (Elf->GetActorLocation().Y + -30.0f), (Elf->GetActorLocation().Z - 100.0f)));
+		attach.RotationRule = EAttachmentRule::SnapToTarget;
+		Elf->CurrentToy->AttachToActor(Elf, attach, "L_Arm_Hand");
+
+		gamemode->AudioComponent->SetSound(gamemode->ItemPickUpCue);
+		gamemode->AudioComponent->Play();
 	}
 	
+	for (int32 i = 0; i < 4; i++)
+	{
+		gamemode->Machines[i].RepairTime = 0.0f;
+	}
+	
+	gamemode->RepairTime = 0.0f;
+
 	Elf->bRepairingMachine = false;
 }
 
 void AJinglePlayerController::DropReleased()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (gamemode->GameState != EState::ePlaying)
+	{
+		return;
+	}
 	
 	if (Elf->CurrentToy != nullptr)
 	{
@@ -142,6 +167,8 @@ void AJinglePlayerController::KrampusActionReleased()
 void AJinglePlayerController::KrampusActionPressed()
 {
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	gamemode->AudioComponent->SetSound(gamemode->KrampusAttackQue);
+	gamemode->AudioComponent->Play();
 	if (Krampus->bElfOverlap)
 	{
 		gamemode->DamageElf();
@@ -156,20 +183,44 @@ void AJinglePlayerController::KrampusActionPressed()
 
 void AJinglePlayerController::KrampusMoveX(float amount)
 {
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (gamemode->GameState != EState::ePlaying)
+	{
+		return;
+	}
+
 	Krampus->MoveX(amount);
 }
 
 void AJinglePlayerController::KrampusMoveY(float amount)
 {
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (gamemode->GameState != EState::ePlaying)
+	{
+		return;
+	}
+
 	Krampus->MoveY(amount);
 }
 
 void AJinglePlayerController::ElfMoveX(float amount)
 {
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (gamemode->GameState != EState::ePlaying)
+	{
+		return;
+	}
+
 	Elf->MoveX(amount);
 }
 
 void AJinglePlayerController::ElfMoveY(float amount)
 {
+	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (gamemode->GameState != EState::ePlaying)
+	{
+		return;
+	}
+
 	Elf->MoveY(amount);
 }

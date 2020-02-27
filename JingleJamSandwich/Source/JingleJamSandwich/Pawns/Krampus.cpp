@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include <Runtime\Engine\Classes\Engine\SkeletalMesh.h>
 #include "Kismet/KismetMathLibrary.h"
+#include "Elf.h"
 
 // Sets default values
 AKrampus::AKrampus()
@@ -15,11 +16,9 @@ AKrampus::AKrampus()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
-	//mesh->SetSimulatePhysics(true);
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule"));
 	CapsuleComp->SetCapsuleHalfHeight(30.0f);
 	CapsuleComp->SetCapsuleRadius(60.0f);
-	//RootComponent = mesh;
 	mesh->SetupAttachment(CapsuleComp, FName("MeshFella"));
 	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	CapsuleComp->SetGenerateOverlapEvents(true);
@@ -67,7 +66,6 @@ void AKrampus::Tick(float DeltaTime)
 	mesh->SetRelativeRotation(CurrentRotation + budge);
 	Speed = Velocity.GetSafeNormal().Size() * 100.0f;
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, FString("KRAMPUS SPEED: " + FString::SanitizeFloat(Speed)));
 }
 
 // Called to bind functionality to input
@@ -104,7 +102,6 @@ void AKrampus::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Other
 	AJingleJamSandwichGameModeBase* gamemode = Cast<AJingleJamSandwichGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 	FString triggerName = FString(*OtherActor->GetName());
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString("OVERLAP WITH ACTOR: " + triggerName));
 
 	if (triggerName.Contains("GREEN"))
 	{
@@ -132,4 +129,10 @@ void AKrampus::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 {
 	bElfOverlap = false;
 	MachineOverlap = (int32)EMachineColour::eColourMax;
+}
+
+void AKrampus::Restart()
+{
+	SetActorLocation(StartLocation);
+	SetActorRotation(StartRotation);
 }
