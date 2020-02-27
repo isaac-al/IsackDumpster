@@ -135,9 +135,38 @@ void AFlockEmitter::Chase(float DeltaTime, float Radius)
 	}
 	#else
 
-	for (int32 i = 0; i < BoidState.Num(); i++)
+	auto boid_chase{[this](const int32& boid)
 	{
+		FBoidState& _boid = BoidState[boid];
 		
+		if (!_boid.Target || _boid.Weights.Chase <= 0.0f)
+		{
+			return;
+		}
+
+		const float offset_radius = -_boid.RadiusFromTarget;
+		FTransform boid_transform;
+		FTransform boid_transform_world;
+		BoidInstanceMesh->GetInstanceTransform(boid, boid_transform, /*world space?*/false);
+		BoidInstanceMesh->GetInstanceTransform(boid, boid_transform_world, /*world space?*/true);
+
+		FVector target_loc = GetBoidWorldLocation(_boid.Target);
+		FVector world_loc = boid_transform_world.GetLocation();
+		FVector direction = target_loc - world_loc;
+		FVector offset = target_loc + (direction.GetSafeNormal() * offset_radius);
+		_boid.TotalForce += Steer((offset - world_loc)) * _boid.Weights.Chase * m_PhysTime;
+	}};
+
+	for (int32 i = 0; i < BoidState.Num(); i += STRIDE)
+	{
+		boid_chase(i);
+		boid_chase(i+1);
+		boid_chase(i+2);
+		boid_chase(i+3);
+		boid_chase(i+4);
+		boid_chase(i+5);
+		boid_chase(i+6);
+		boid_chase(i+7);
 	}
 	#endif
 }
@@ -176,6 +205,8 @@ void AFlockEmitter::Separate(float DeltaTime, float Radius)
 		FTransform otherboid_transform;
 		BoidInstanceMesh->GetInstanceTransform(other, otherboid_transform, /*world space?*/false);
 
+		FVector result{FVector::ZeroVector};
+
 		float r = FVector::Distance(boid_transform.GetLocation(), otherboid_transform.GetLocation());
 		const float min_dist = 200.0f;
 		if (r < min_dist)
@@ -184,8 +215,14 @@ void AFlockEmitter::Separate(float DeltaTime, float Radius)
 				otherboid_transform.GetLocation();
 			float dist = disp.Size();
 			FVector dir = disp;
-			return dir / dist;
+
+			if (dist > 0)
+			{
+				result = dir / dist;
+			}
 		}
+
+		return result;
 	}};
 
 	auto boid_separate {[&get_other_dist, this](const int32& boid)
@@ -205,10 +242,23 @@ void AFlockEmitter::Separate(float DeltaTime, float Radius)
 			f += get_other_dist(j+6, boid_transform);
 			f += get_other_dist(j+7, boid_transform);
 		}
+		
+		f /= BoidState.Num();
 
 		BoidState[boid].TotalForce += Steer(f) * BoidState[boid].Weights.Seperate * m_PhysTime;
 	}};
 
+	for (int32 i = 0; i < BoidState.Num(); i += STRIDE)
+	{
+		boid_separate(i);
+		boid_separate(i+1);
+		boid_separate(i+2);
+		boid_separate(i+3);
+		boid_separate(i+4);
+		boid_separate(i+5);
+		boid_separate(i+6);
+		boid_separate(i+7);
+	}
 	#if 0
 for (int32 i = 0; i < BoidState.Num(); i+= STRIDE)
 	{
@@ -552,7 +602,7 @@ void AFlockEmitter::Tick(float DeltaTime)
 		BIT_SWITCH((uint32)BoidBehaviour)
 		{
 		case (uint32)EEnemyBehavaiour::eNavigate:
-			//Chase(DeltaTime, 0.0f);
+			Chase(DeltaTime, 0.0f);
 			Separate(DeltaTime, 0.0f);
 			//Align(DeltaTime);
 			Cohere(DeltaTime, 0.0f);

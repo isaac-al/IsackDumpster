@@ -132,5 +132,5 @@ public:
 
 private:
 	const float m_PhysTimeStep = 1.0f / 30.0f;
-	float m_PhysTime = 0.0f;
+	float m_PhysTime = 0.0f; 
 };

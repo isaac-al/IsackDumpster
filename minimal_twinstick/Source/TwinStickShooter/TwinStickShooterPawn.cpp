@@ -81,7 +81,7 @@ void ATwinStickShooterPawn::BeginPlay()
 	AFlockEmitter* const flock_default = GetWorld()->SpawnActor<AFlockEmitter>(FActorSpawnParameters());
 	FBoidState default_state;
 									//chase //sep //cohere //align //wander //scuttle //shape
-	default_state.Weights = FWeights(0.f, .3f, .2f, 0.02f, 0.0f, 0.0f, 0.0f);
+	default_state.Weights = FWeights(0.f, .08f, .7f, 0.02f, 0.0f, 0.0f, 0.0f);
 	default_state.RadiusFromTarget = 0.0f;
 	default_state.bIsPlayer = true;
 	flock_default->Init(EEnemyBehavaiour::eNavigate | EEnemyBehavaiour::eShoot, default_state, 128, FLinearColor::Blue, .5f, 200);
