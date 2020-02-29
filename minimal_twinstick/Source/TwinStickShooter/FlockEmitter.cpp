@@ -66,7 +66,7 @@ void AFlockEmitter::Init(EEnemyBehavaiour Behaviour, FBoidState InBoidState, int
 		float randY = actorLoc.Y + FMath::RandRange(-radius, radius);
 		float randZ = actorLoc.Z + FMath::RandRange(-radius, radius);
 
-		UStaticMesh* sm = LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/Meshes/SM_BoidDefault.SM_BoidDefault'"));
+		UStaticMesh* sm = LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/Meshes/SM_Shooter.SM_Shooter'"));
 		mesh->SetStaticMesh(sm);
 		mesh->SetWorldLocation(FVector(randX, randY, randZ));
 		BoidMesh.Add(mesh);
@@ -83,8 +83,10 @@ void AFlockEmitter::Init(EEnemyBehavaiour Behaviour, FBoidState InBoidState, int
 	UStaticMesh* sm = LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/Meshes/SM_BoidDefault.SM_BoidDefault'"));
 	BoidInstanceMesh->SetStaticMesh(sm);
 
-	UMaterialInstanceDynamic* mi = UMaterialInstanceDynamic::Create(BoidInstanceMesh->GetMaterial(0), NULL);
-	//mi->SetVectorParameterValue(TEXT("BaseColour"), InColour);
+	UMaterialInterface* base_mat = BoidInstanceMesh->GetMaterial(0);
+
+	UMaterialInstanceDynamic* mi = UMaterialInstanceDynamic::Create(base_mat, NULL);
+	mi->SetVectorParameterValue(TEXT("BaseColour"), InColour);
 	BoidInstanceMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BoidInstanceMesh->SetRelativeScale3D(FVector::OneVector * InScale);
 

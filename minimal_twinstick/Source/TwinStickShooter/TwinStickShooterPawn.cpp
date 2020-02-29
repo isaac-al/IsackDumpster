@@ -27,8 +27,9 @@ const FName ATwinStickShooterPawn::FireForwardBinding("FireForward");
 const FName ATwinStickShooterPawn::FireRightBinding("FireRight");
 
 bool bGravityEnabled = true;
+float m_fDeltaTime = 0.0f;
 
-ATwinStickShooterPawn::ATwinStickShooterPawn()
+ATwinStickShooterPawn::ATwinStickShooterPawn() : m_eCurrentPlayerType(ePlayerType_FPS)
 {		
 	//static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("/Game/Meshes/SM_Ship.SM_Ship"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("/Game/TwinStick/Meshes/TwinStickUFO.TwinStickUFO"));
@@ -85,6 +86,19 @@ void ATwinStickShooterPawn::BeginPlay()
 	default_state.RadiusFromTarget = 0.0f;
 	default_state.bIsPlayer = true;
 	flock_default->Init(EEnemyBehavaiour::eNavigate | EEnemyBehavaiour::eShoot, default_state, 128, FLinearColor::Blue, .5f, 200);
+
+	MoveBehaviour[ePlayerType_FPS] = new FPS_PlayerMove();
+	MoveBehaviour[ePlayerType_God] = new God_PlayerMove();
+
+	m_fDeltaTime = 0.0f;
+}
+
+void ATwinStickShooterPawn::EndPlay(EEndPlayReason::Type)
+{
+	for (int32 player_type = 0; player_type < NUM_PLAYER_TYPE; player_type++)
+	{
+		delete MoveBehaviour[player_type];
+	}
 }
 
 void ATwinStickShooterPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -97,8 +111,8 @@ void ATwinStickShooterPawn::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAxis("LookUp");
 	PlayerInputComponent->BindAxis("LookRight");
 	PlayerInputComponent->BindAxis("FlyUp");
-
 	PlayerInputComponent->BindAction("ToggleGravity", IE_Pressed, this, &ThisClass::OnToggleGravity);
+	PlayerInputComponent->BindAction("SwitchMode", IE_Pressed, this, &ThisClass::OnSwitchPlayerMode);
 
 	FInputModeGameOnly input;
 	input.SetConsumeCaptureMouseDown(true);
@@ -111,38 +125,127 @@ void ATwinStickShooterPawn::OnToggleGravity()
 	CapsuleComponent->SetEnableGravity(bGravityEnabled = !bGravityEnabled);
 }
 
-FRotator CurrentRotation{FRotator::ZeroRotator};
+FTransform PrevTransform;
+FTransform CurrentTransform;
+bool m_bPlayerModeAnimate = false;
+float m_fPlayerModeAlpha = 0.0f;
+
+void ATwinStickShooterPawn::OnSwitchPlayerMode()
+{
+	m_eCurrentPlayerType = ePlayerType((1 + m_eCurrentPlayerType + NUM_PLAYER_TYPE) % NUM_PLAYER_TYPE);
+
+	PrevTransform.SetLocation(GetActorLocation());
+	PrevTransform.SetRotation(CameraComponent->GetComponentRotation().Quaternion());
+
+	m_bPlayerModeAnimate = false;
+	m_fPlayerModeAlpha = 0.0f;
+
+	TArray<FHitResult> hit;
+
+	float half_size = 1000000;
+	FVector cast_start = PrevTransform.GetLocation() + (FVector::UpVector * half_size);
+	FVector cast_end = PrevTransform.GetLocation() + (FVector::UpVector * -half_size);
+	GetWorld()->LineTraceMultiByObjectType(hit, cast_start, cast_end, ECC_WorldStatic);
+
+	// Get hit location from ground
+	FVector ground_location = hit.Last().ImpactPoint;
+
+	switch (m_eCurrentPlayerType)
+	{
+	case ATwinStickShooterPawn::ePlayerType_God:
+	{
+		CurrentTransform.SetLocation(FVector(GetActorLocation().X, GetActorLocation().Y, ground_location.Z + 1720.0f));
+		CurrentTransform.SetRotation(FQuat::MakeFromEuler(FVector(0.0f, -45.0f, 0.0f)));
+		CapsuleComponent->SetEnableGravity(false);
+	} break;
+	case ATwinStickShooterPawn::ePlayerType_FPS:
+	{
+		CurrentTransform.SetLocation(ground_location + (FVector::UpVector * 100));
+		CurrentTransform.SetRotation(FQuat::MakeFromEuler(FVector::ZeroVector));
+	} break;
+	default: break;
+	}
+
+	m_bPlayerModeAnimate = true;
+}
 
 void ATwinStickShooterPawn::Tick(float DeltaSeconds)
 {	
+	m_fDeltaTime = DeltaSeconds;
 	Super::Tick(DeltaSeconds);
-
-	// ====== Camera Rotation ========================
-	float y{ GetInputAxisValue("LookUp") };
-	float x{ GetInputAxisValue("LookRight") };
-	CurrentRotation.Pitch += y;
-	CurrentRotation.Yaw += x;
-
-	CurrentRotation.Pitch = FMath::Clamp(CurrentRotation.Pitch, -45.0f, 45.0f);
-	CameraComponent->SetRelativeRotation(CurrentRotation);
-	// ===============================================
 	
-	// ====== Pawn Translation =======================
-	float move_x{GetInputAxisValue(MoveForwardBinding)};
-	float move_y{GetInputAxisValue(MoveRightBinding)};
-	FRotator forward_rot = CurrentRotation;
-	forward_rot.Roll  = 0;
+	if (m_bPlayerModeAnimate)
+	{
+		// Animate Transform!
+		m_fPlayerModeAlpha += m_fDeltaTime;
+
+		float result_alpha = UKismetMathLibrary::Ease(0.0f, 1.0f, m_fPlayerModeAlpha, EEasingFunc::EaseOut, 5);
+
+		FQuat interp_rot = FQuat::Slerp(PrevTransform.GetRotation(), CurrentTransform.GetRotation(), result_alpha);
+		FVector interp_loc = FMath::Lerp(PrevTransform.GetLocation(), CurrentTransform.GetLocation(), result_alpha);
+		CameraComponent->SetRelativeRotation(interp_rot);
+		SetActorLocation(interp_loc);
+
+		if (m_fPlayerModeAlpha >= 1.0f)
+		{
+			m_bPlayerModeAnimate = false;
+			CurrentRotation = CameraComponent->GetRelativeRotation();
+		}
+	}
+	else
+	{
+		(*MoveBehaviour[m_eCurrentPlayerType])(this);
+	}
+}
+
+void FPS_PlayerMove::operator()(ATwinStickShooterPawn* InPawn) 
+{
+	ATwinStickShooterPawn& p = (*InPawn);
+
+	//// ====== Camera Rotation ========================
+	float y{ InPawn->GetInputAxisValue("LookUp") };
+	float x{ InPawn->GetInputAxisValue("LookRight") };
+	p.CurrentRotation.Pitch += y;
+	p.CurrentRotation.Yaw += x;
+	p.CurrentRotation.Pitch = FMath::Clamp(p.CurrentRotation.Pitch, -45.0f, 45.0f);
+	p.CameraComponent->SetRelativeRotation(p.CurrentRotation);
+	//// ===============================================
+
+	//// ====== Pawn Translation =======================
+	float move_x{ p.GetInputAxisValue(p.MoveForwardBinding) };
+	float move_y{ p.GetInputAxisValue(p.MoveRightBinding) };
+	FRotator forward_rot = p.CurrentRotation;
+	forward_rot.Roll = 0;
 	forward_rot.Pitch = 0;
 	FVector rotation_vector = forward_rot.Vector();
-	FVector dir{(rotation_vector * move_x) + (rotation_vector.RotateAngleAxis(90.0f, FVector::UpVector) * move_y)};
+	FVector dir{ (rotation_vector * move_x) + (rotation_vector.RotateAngleAxis(90.0f, FVector::UpVector) * move_y) };
 	dir.Normalize();
-	Cast<UPrimitiveComponent>(RootComponent)->BodyInstance.AddForce(dir* MoveSpeed);
-	// ===============================================
+	Cast<UPrimitiveComponent>(p.RootComponent)->BodyInstance.AddForce(dir * p.MoveSpeed);
+	//// ===============================================
+
+	extern bool bGravityEnabled;
 
 	if (!bGravityEnabled)
 	{
-		float move_z{ GetInputAxisValue("FlyUp") };
+		float move_z{ p.GetInputAxisValue("FlyUp") };
 		FVector fly_dir = FVector::UpVector;
-		Cast<UPrimitiveComponent>(RootComponent)->BodyInstance.AddForce(fly_dir * (move_z * MoveSpeed));
+		Cast<UPrimitiveComponent>(p.RootComponent)->BodyInstance.AddForce(fly_dir * (move_z * p.MoveSpeed));
 	}
+}
+
+void God_PlayerMove::operator()(ATwinStickShooterPawn* InPawn)
+{
+	ATwinStickShooterPawn& p = (*InPawn);
+
+	//// ====== Pawn Translation =======================
+	float move_x{ p.GetInputAxisValue(p.MoveForwardBinding) };
+	float move_y{ p.GetInputAxisValue(p.MoveRightBinding) };
+	FRotator forward_rot = p.CurrentRotation;
+	forward_rot.Roll = 0;
+	forward_rot.Pitch = 0;
+	FVector rotation_vector = forward_rot.Vector();
+	FVector dir{ (rotation_vector * move_x) + (rotation_vector.RotateAngleAxis(90.0f, FVector::UpVector) * move_y) };
+	dir.Normalize();
+	Cast<UPrimitiveComponent>(p.RootComponent)->BodyInstance.AddForce(dir * p.MoveSpeed);
+	//// ===============================================
 }

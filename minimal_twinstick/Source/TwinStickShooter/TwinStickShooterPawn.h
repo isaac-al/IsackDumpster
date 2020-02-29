@@ -4,12 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "TwinStickShooter.h"
+#include "UnrealMathUtility.h"
 #include "TwinStickShooterPawn.generated.h"
+
+#define NUM_PLAYER_TYPE 2
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE( FPlayerDead );
 
 class ATwinStickShooterProjectile;
 class USphereComponent;
+
 
 UCLASS(Blueprintable)
 class ATwinStickShooterPawn : public APawn
@@ -28,6 +33,23 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	TSubclassOf<ATwinStickShooterProjectile> ProjectileClass;
 
+	// Forward declaring friend struct instead of using getters and setters
+	friend struct Base_PlayerMove;
+	friend struct FPS_PlayerMove;
+	friend struct God_PlayerMove;
+
+	Base_PlayerMove* MoveBehaviour[NUM_PLAYER_TYPE];
+	
+	enum ePlayerType
+	{
+		ePlayerType_God,
+		ePlayerType_FPS
+	};
+
+	ePlayerType m_eCurrentPlayerType;
+
+	FRotator CurrentRotation{ FRotator::ZeroRotator };
+
 public:
 
 	ATwinStickShooterPawn();
@@ -44,7 +66,9 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	void OnToggleGravity();
+	void OnSwitchPlayerMode();
 	virtual void BeginPlay() override;
+	virtual void EndPlay(EEndPlayReason::Type) override;
 
 	// Static names for axis bindings
 	static const FName MoveForwardBinding;
@@ -58,3 +82,19 @@ public:
 	FORCEINLINE class UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 };
 
+
+struct Base_PlayerMove
+{
+	virtual void operator()(ATwinStickShooterPawn* InPawn) = 0;// { QUICK_LOG_UPDATE(TEXT("BASE MOVE")); return InTransform; }
+};
+
+struct FPS_PlayerMove : Base_PlayerMove
+{
+	void operator()(ATwinStickShooterPawn* InPawn);//
+
+};
+
+struct God_PlayerMove : Base_PlayerMove
+{
+	void operator()(ATwinStickShooterPawn* InPawn);
+};
