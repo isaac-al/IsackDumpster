@@ -41,72 +41,43 @@ AFlockEmitter::AFlockEmitter()
 
 }
 
-void AFlockEmitter::Init(EEnemyBehavaiour Behaviour, FBoidState InBoidState, int32 NumToSpawn, FLinearColor InColour, float InScale, int32 SpawnRangeRadius)
+void AFlockEmitter::Init(EEnemyBehavaiour Behaviour, FBoidState InBoidState, int32 NumToSpawn, FLinearColor InColour, float InScale, int32 SpawnRangeRadius, AActor* TargetActor)
 {
 	int32 radius  = SpawnRangeRadius;
 	BoidBehaviour = Behaviour;
-	BoidMass      = InScale;
+	BoidMass      = InScale * 0.05f;
+
 	FVector actorLoc = GetActorLocation();
 
-#if 0
-	for (int32 i = 0; i < NumToSpawn; i++)
-	{
-		UStaticMeshComponent* mesh = NewObject<UStaticMeshComponent>(this);
-		mesh->RegisterComponent();
-		mesh->ComponentTags.Empty();
-		FName boid = FName(TEXT("boid"));
-		mesh->ComponentTags.Add(std::move(boid));
-		FString player_str(TEXT(""));
-		std::string str = std::to_string(InBoidState.bIsPlayer);
-		char* isplayer = &(str)[0];
-		mesh->ComponentTags.Add(std::move(isplayer));
-		FVector actorLoc = GetActorLocation();
-
-		float randX = actorLoc.X + FMath::RandRange(-radius, radius);
-		float randY = actorLoc.Y + FMath::RandRange(-radius, radius);
-		float randZ = actorLoc.Z + FMath::RandRange(-radius, radius);
-
-		UStaticMesh* sm = LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/Meshes/SM_Shooter.SM_Shooter'"));
-		mesh->SetStaticMesh(sm);
-		mesh->SetWorldLocation(FVector(randX, randY, randZ));
-		BoidMesh.Add(mesh);
-		BoidState.Init(InBoidState, NumToSpawn);
-		FlockSize = NumToSpawn;
-		UMaterialInstanceDynamic* mi = UMaterialInstanceDynamic::Create(mesh->GetMaterial(0), NULL);
-		mesh->SetMaterial(0, mi);
-		mi->SetVectorParameterValue(TEXT("BaseColour"), InColour);
-		mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		mesh->SetRelativeScale3D(FVector::OneVector * InScale);
-	}
-#else
+	if (TargetActor)
+		actorLoc = TargetActor->GetActorLocation();
 	
+	SetActorLocation(actorLoc);
+	BoidTarget = TargetActor;
 	UStaticMesh* sm = LoadObject<UStaticMesh>(NULL, TEXT("StaticMesh'/Game/Meshes/SM_BoidDefault.SM_BoidDefault'"));
 	BoidInstanceMesh->SetStaticMesh(sm);
-
 	UMaterialInterface* base_mat = BoidInstanceMesh->GetMaterial(0);
-
 	UMaterialInstanceDynamic* mi = UMaterialInstanceDynamic::Create(base_mat, NULL);
 	mi->SetVectorParameterValue(TEXT("BaseColour"), InColour);
 	BoidInstanceMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	BoidInstanceMesh->SetRelativeScale3D(FVector::OneVector * InScale);
+	BoidInstanceMesh->SetRelativeLocation(FVector::ZeroVector);
 
 	for (int32 i = 0; i < NumToSpawn; i++)
 	{
 		FTransform boid_transform{};
-		float randX = actorLoc.X + FMath::RandRange(-radius, radius);
-		float randY = actorLoc.Y + FMath::RandRange(-radius, radius);
-		float randZ = actorLoc.Z + FMath::RandRange(-radius, radius);
+		float randX = (actorLoc.X * 1) + FMath::RandRange(-radius, radius);
+		float randY = (actorLoc.Y * 1) + FMath::RandRange(-radius, radius);
+		float randZ = (actorLoc.Z * 1) + FMath::RandRange(-radius, radius);
 		FVector start_loc{randX, randY, randZ};
 
 		boid_transform.SetLocation(start_loc);
+		boid_transform.SetScale3D(FVector::OneVector * InScale);
 		BoidInstanceMesh->AddInstance(boid_transform);
 		BoidState.Init(InBoidState, NumToSpawn);
 	}
 
 	BoidInstanceMesh->SetMaterial(0, mi);
 	FlockSize = NumToSpawn;
-
-#endif
 }
 
 // Optional radius to avoid collision with player
@@ -114,34 +85,16 @@ void AFlockEmitter::Chase(float DeltaTime, float Radius)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Chase!"));
 
-	#if 0
-	for (int32 i = 0; i < BoidMesh.Num(); i++)
-	{
-		if (!BoidState[i].Target)
-		{
-			return;	
-		}
-		
-		FVector target_loc = GetBoidWorldLocation(BoidState[i].Target);
+	if (!BoidTarget) return;
+	//~
 
-		FVector loc = BoidState[i].Target->GetOwner()->GetActorLocation();
-
-		const float offset_radius = -BoidState[i].RadiusFromTarget;
-		FVector worldLocation = GetBoidWorldLocation(BoidMesh[i]);
-		FVector direction = target_loc - worldLocation;
-
-		FVector offset = target_loc + (direction.GetSafeNormal() * offset_radius);
-		BoidState[i].TotalForce += Steer(i, (offset - worldLocation)) * BoidState[i].Weights.Chase;
-		//DrawDebugLine(GetWorld(), worldLocation, (offset), FColor::Magenta, false, -1.0f, (uint8)'\000', 2.0f);
-		DrawDebugSphere(GetWorld(), (offset), 10.0f, 6, FColor::Magenta);
-	}
-	#else
+	DrawDebugSphere(GetWorld(), BoidTarget->GetActorLocation(), 100.0f, 6, FColor::Magenta);
 
 	auto boid_chase{[this](const int32& boid)
 	{
 		FBoidState& _boid = BoidState[boid];
 		
-		if (!_boid.Target || _boid.Weights.Chase <= 0.0f)
+		if (_boid.Weights.Chase <= 0.0f)
 		{
 			return;
 		}
@@ -152,7 +105,7 @@ void AFlockEmitter::Chase(float DeltaTime, float Radius)
 		BoidInstanceMesh->GetInstanceTransform(boid, boid_transform, /*world space?*/false);
 		BoidInstanceMesh->GetInstanceTransform(boid, boid_transform_world, /*world space?*/true);
 
-		FVector target_loc = GetBoidWorldLocation(_boid.Target);
+		FVector target_loc = BoidTarget->GetActorLocation();
 		FVector world_loc = boid_transform_world.GetLocation();
 		FVector direction = target_loc - world_loc;
 		FVector offset = target_loc + (direction.GetSafeNormal() * offset_radius);
@@ -170,38 +123,10 @@ void AFlockEmitter::Chase(float DeltaTime, float Radius)
 		boid_chase(i+6);
 		boid_chase(i+7);
 	}
-	#endif
 }
 
 void AFlockEmitter::Separate(float DeltaTime, float Radius)
 {
-#if 0
-	for (int32 i = 0; i < BoidMesh.Num(); i++)
-	{
-		// add force in inverse direction of distance between a and b
-
-		FVector f = FVector::ZeroVector;
-
-		for (int32 j = 0; j < BoidMesh.Num(); j++)
-		{
-			if (i == j) continue;
-
-			float r = FVector::Distance(BoidMesh[i]->RelativeLocation, BoidMesh[j]->RelativeLocation);
-			const float min_dist = 200.0f;
-			if (r < min_dist)
-			{
-				FVector disp = BoidMesh[i]->RelativeLocation -
-					BoidMesh[j]->RelativeLocation;
-				float dist = disp.Size();
-				FVector dir = disp;
-				f += dir / dist;
-			}
-		}
-
-		BoidState[i].TotalForce += Steer(i, /*GetBoidWorldLocation(BoidMesh[i]) + */f) * BoidState[i].Weights.Seperate;
-	}
-#else
-
 	auto get_other_dist{[this](const int32& other, const FTransform& boid_transform) -> FVector
 	{
 		FTransform otherboid_transform;
@@ -261,37 +186,6 @@ void AFlockEmitter::Separate(float DeltaTime, float Radius)
 		boid_separate(i+6);
 		boid_separate(i+7);
 	}
-	#if 0
-for (int32 i = 0; i < BoidState.Num(); i+= STRIDE)
-	{
-		FTransform boid_transform;
-		BoidInstanceMesh->GetInstanceTransform(i, boid_transform, /*world space?*/false);
-
-		FVector f = FVector::ZeroVector;
-
-		for (int32 j = 0; j < BoidState.Num(); j++)
-		{
-			if (i == j) continue;
-
-			FTransform otherboid_transform;
-			BoidInstanceMesh->GetInstanceTransform(j, otherboid_transform, /*world space?*/false);
-
-			float r = FVector::Distance(boid_transform.GetLocation(), otherboid_transform.GetLocation());
-			const float min_dist = 200.0f;
-			if (r < min_dist)
-			{
-				FVector disp = boid_transform.GetLocation() -
-					otherboid_transform.GetLocation();
-				float dist = disp.Size();
-				FVector dir = disp;
-				f += dir / dist;
-			}
-		}
-
-		BoidState[i].TotalForce += Steer(f) * BoidState[i].Weights.Seperate;
-	}
-#endif
-#endif
 }
 
 
@@ -659,7 +553,6 @@ void AFlockEmitter::Tick(float DeltaTime)
 	#endif
 		}
 	#else
-	#if 1
 
 		auto integrate_forces{[this](const int32& boid)
 		{
@@ -670,7 +563,7 @@ void AFlockEmitter::Tick(float DeltaTime)
 			totalForce = totalForce.GetClampedToSize(0.1f, 1.0f);
 			BoidState[boid].Velocity += totalForce;
 			BoidState[boid].TotalForce = FVector::ZeroVector;
-			const float drag = 1/* * BaseDrag / BoidMass */;
+			const float drag = 1 * BaseDrag / BoidMass;
 			const float speed = BaseSpeed * BoidMass;
 			FVector vel_unit = BoidState[boid].Velocity.GetSafeNormal();
 
@@ -694,7 +587,6 @@ void AFlockEmitter::Tick(float DeltaTime)
 
 		m_PhysTime -= m_PhysTimeStep;
 
-	#endif
 	#endif
 	}
 }

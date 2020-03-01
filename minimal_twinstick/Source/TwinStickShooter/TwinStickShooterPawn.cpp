@@ -20,6 +20,7 @@
 #include "Components/CapsuleComponent.h"
 #include "TwinstickShooter.h"
 #include "Engine/Engine.h"
+#include "Engine/StaticMeshActor.h"
 
 const FName ATwinStickShooterPawn::MoveForwardBinding("MoveForward");
 const FName ATwinStickShooterPawn::MoveRightBinding("MoveRight");
@@ -82,14 +83,27 @@ void ATwinStickShooterPawn::BeginPlay()
 	AFlockEmitter* const flock_default = GetWorld()->SpawnActor<AFlockEmitter>(FActorSpawnParameters());
 	FBoidState default_state;
 									//chase //sep //cohere //align //wander //scuttle //shape
-	default_state.Weights = FWeights(0.f, .08f, .7f, 0.02f, 0.0f, 0.0f, 0.0f);
+	default_state.Weights = FWeights(1.0f, .1f, .1f, .0f, .0f, .0f, .0f);
 	default_state.RadiusFromTarget = 0.0f;
 	default_state.bIsPlayer = true;
-	flock_default->Init(EEnemyBehavaiour::eNavigate | EEnemyBehavaiour::eShoot, default_state, 128, FLinearColor::Blue, .5f, 200);
 
 	MoveBehaviour[ePlayerType_FPS] = new FPS_PlayerMove();
 	MoveBehaviour[ePlayerType_God] = new God_PlayerMove();
 
+	TArray<AActor*> FoundMeshes;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AStaticMeshActor::StaticClass(), FoundMeshes);
+	AActor* TargetMesh = nullptr;
+
+	for (int32 i = 0; i < FoundMeshes.Num(); i++)
+	{
+		if (FoundMeshes[i]->GetName().Contains(TEXT("BeeHive")))
+		{
+			TargetMesh = FoundMeshes[i];
+		}
+	}
+
+	flock_default->SetActorLocation(TargetMesh->GetActorLocation());
+	flock_default->Init(EEnemyBehavaiour::eNavigate | EEnemyBehavaiour::eShoot, default_state, 128, FLinearColor::Blue, .3f, 75, TargetMesh);
 	m_fDeltaTime = 0.0f;
 }
 
@@ -154,12 +168,14 @@ void ATwinStickShooterPawn::OnSwitchPlayerMode()
 	{
 	case ATwinStickShooterPawn::ePlayerType_God:
 	{
+		MoveSpeed = 520000.0f;
 		CurrentTransform.SetLocation(FVector(GetActorLocation().X, GetActorLocation().Y, ground_location.Z + 1720.0f));
 		CurrentTransform.SetRotation(FQuat::MakeFromEuler(FVector(0.0f, -45.0f, 0.0f)));
 		CapsuleComponent->SetEnableGravity(false);
 	} break;
 	case ATwinStickShooterPawn::ePlayerType_FPS:
 	{
+		MoveSpeed = 120000.0f;
 		CurrentTransform.SetLocation(ground_location + (FVector::UpVector * 100));
 		CurrentTransform.SetRotation(FQuat::MakeFromEuler(FVector::ZeroVector));
 	} break;
