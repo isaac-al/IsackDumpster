@@ -8,6 +8,7 @@ public class TwinStickShooterTarget : TargetRules
 	public TwinStickShooterTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		ExtraModuleNames.Add("TwinStickShooter");
+        DefaultBuildSettings = BuildSettingsVersion.V2;
+        ExtraModuleNames.Add("TwinStickShooter");
 	}
 }
