@@ -58,18 +58,14 @@ void ASwarmGameMode::GenericPlayerInitialization(AController* C)
 {
 	Super::GenericPlayerInitialization(C);
 
-	//ATwinStickShooterPawn* pawn = Cast<ATwinStickShooterPawn>((GetWorld()->SpawnActor(ATwinStickShooterPawn::StaticClass())));
 	FActorSpawnParameters params;
 	params.Name = FName(TEXT("PlayerPawn"));
 	params.bHideFromSceneOutliner = false;
 	FTransform initalSpawn;
+	initalSpawn.SetLocation(FVector::UpVector * 150.0f);
 	ATwinStickShooterPawn* pawn = GetWorld()->SpawnActorDeferred<ATwinStickShooterPawn>(ATwinStickShooterPawn::StaticClass(), initalSpawn, GetOwner(), (APawn*) nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	
 	pawn->FinishSpawning(initalSpawn);
-	//ATwinStickShooterPawn* pawn = GetWorld()->SpawnActor<ATwinStickShooterPawn>(params);
 	C->Possess(pawn);
-
-	//pawn->AddToRoot();
 }
 
 // TODO: 

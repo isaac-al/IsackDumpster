@@ -92,7 +92,7 @@ public:
 	// Sets default values for this actor's properties
 	AFlockEmitter();
 
-	void Init(EEnemyBehavaiour Behaviour, FBoidState InBoidState, int32 NumToSpawn, FLinearColor InColour, float InScale, int32 SpawnRangeRadius);
+	void Init(EEnemyBehavaiour Behaviour, FBoidState InBoidState, int32 NumToSpawn, FLinearColor InColour, float InScale, int32 SpawnRangeRadius, AActor* TargetActor);
 	
 	UPROPERTY()
 	TArray<UStaticMeshComponent*> BoidMesh;
@@ -101,16 +101,19 @@ public:
 	UHierarchicalInstancedStaticMeshComponent* BoidInstanceMesh;
 
 	UPROPERTY()
-	TArray <UMaterialInstanceDynamic*> MaterialInstance;
+	TArray<UMaterialInstanceDynamic*> MaterialInstance;
+
+	UPROPERTY()
+	AActor* BoidTarget = nullptr;
 
 	TArray<FBoidState> BoidState;
 
 	UPROPERTY()
 	int32 FlockSize = 100;
 
-	float BoidMass = 0.5f;
-	float BaseSpeed = 1000.0f;
-	float BaseDrag = .0;
+	float BoidMass = .3f;
+	float BaseSpeed = 30000.0f;
+	float BaseDrag = .00001f;
 
 	EEnemyBehavaiour BoidBehaviour;
 
