@@ -34,7 +34,7 @@ const FName ATwinStickShooterPawn::FireRightBinding("FireRight");
 bool bGravityEnabled = true;
 float m_fDeltaTime = 0.0f;
 
-const FVector MenuWidgetInterface::m_vOpenScale = FVector(1.0f, 1.0f, 1.0f);
+const FVector MenuWidgetInterface::m_vOpenScale = FVector(0.12f, 0.12f, 0.15f);
 
 void ATwinStickShooterPawn::UpdatePlayerBehaviour()
 {
@@ -46,7 +46,7 @@ void ATwinStickShooterPawn::UpdateMenuOpenAnimation(EMenuWidgetState AnimType)
 	int32 dir = AnimType == eMenuWidgetState_Opening ? 1 : -1;
 	FVector current_scale = MenuWidget->GetRelativeScale3D();
 	FVector EndScale   = MenuWidgetInterface::m_vOpenScale;
-	FVector StartScale = FVector(EndScale.X, EndScale.Y, 1.0f);
+	FVector StartScale = FVector(EndScale.X, EndScale.Y, 0.0f);
 
 	float d = m_fDeltaTime * MenuWidgetInterface::m_fOpenAnimSpeed;
 	MainMenuInterface.m_fMenuOpenAlpha = FMath::Clamp(MainMenuInterface.m_fMenuOpenAlpha + (d * dir), 0.0f, 1.0f);
@@ -279,28 +279,18 @@ void ATwinStickShooterPawn::Tick(float DeltaSeconds)
 		FVector cam_forward = CameraComponent->GetForwardVector();
 		cam_forward.Z = 0.0f;
 
-
-		
 		FRotator menu_rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + cam_forward * 200.0f);
 		menu_rotation += FRotator::MakeFromEuler(FVector(0.0f,0.0f,180.0f));
 		FVector menu_location = cam_forward * 200.0f;
 		MenuWidget->SetRelativeRotation(menu_rotation);
 		MenuWidget->SetRelativeLocation(menu_location);
-		//DrawDebugSphere(GetWorld(), GetActorLocation() + MenuWidget->GetRelativeLocation(), 5.0f, 8, FColor::Red, true, 10.0f, 0, 1.0f);
 		DrawDebugBox(GetWorld(), GetActorLocation() + CameraComponent->GetForwardVector() * 200.0f, FVector(50.0f, 100.0f, 50.0f), MenuWidget->GetRelativeRotation().Quaternion(), FColor::Emerald, false, -1, 0, 10.0f);
-		UpdatePlayerBehaviour();
-
-		QUICK_LOG_UPDATE(menu_location.ToString());
-		QUICK_LOG_UPDATE(TEXT("Menu Location"));
-
-		QUICK_LOG_UPDATE(menu_rotation.ToString());
-		QUICK_LOG_UPDATE(TEXT("Menu Rotation"));
 
 		switch (MainMenuInterface.m_eMenuWidgetState)
 		{
 		case eMenuWidgetState_Closed:
 		{
-			//UpdatePlayerBehaviour();
+			UpdatePlayerBehaviour();
 		} break;
 		case eMenuWidgetState_Open:
 		{
