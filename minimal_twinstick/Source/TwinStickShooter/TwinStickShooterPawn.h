@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "TwinStickShooter.h"
-#include "UnrealMathUtility.h"
 #include "TwinStickShooterPawn.generated.h"
 
 #define NUM_PLAYER_TYPE 2
@@ -15,6 +14,21 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE( FPlayerDead );
 class ATwinStickShooterProjectile;
 class USphereComponent;
 
+enum EMenuWidgetState
+{
+	eMenuWidgetState_Closed = 0,
+	eMenuWidgetState_Opening,
+	eMenuWidgetState_Open,
+	eMenuWidgetState_Closing
+};
+
+struct MenuWidgetInterface
+{
+	EMenuWidgetState m_eMenuWidgetState;// = eMenuWidgetState_Closed;
+	float m_fMenuOpenAlpha = 0.0f;
+	static const FVector m_vOpenScale;// = FVector2D(0.5f, 0.5f);
+	static const int32 m_fOpenAnimSpeed = 10.0f;
+};
 
 UCLASS(Blueprintable)
 class ATwinStickShooterPawn : public APawn
@@ -40,15 +54,19 @@ protected:
 
 	Base_PlayerMove* MoveBehaviour[NUM_PLAYER_TYPE];
 	
-	enum ePlayerType
+	enum EPlayerType
 	{
 		ePlayerType_God,
 		ePlayerType_FPS
 	};
 
-	ePlayerType m_eCurrentPlayerType;
-
+	EPlayerType m_eCurrentPlayerType;
 	FRotator CurrentRotation{ FRotator::ZeroRotator };
+	MenuWidgetInterface MainMenuInterface;
+
+	void OnOpenMenu();
+	void UpdateMenuOpenAnimation(enum EMenuWidgetState AnimType);
+	void UpdatePlayerBehaviour();
 
 public:
 
@@ -58,15 +76,16 @@ public:
 	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite)
 	float MoveSpeed;
 
-	/** Sound to play each time we fire */
-	UPROPERTY(Category = Audio, EditAnywhere, BlueprintReadWrite)
-	class USoundBase* FireSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UWidgetComponent* MenuWidget = nullptr;
+	class UWidgetInteractionComponent* WidgetInteractionComponent;
 
 	// Begin Actor Interface
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
 	void OnToggleGravity();
 	void OnSwitchPlayerMode();
+	void AnimatePlayerTransform();
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type) override;
 
@@ -80,8 +99,8 @@ public:
 
 	/** Returns CameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+private:
 };
-
 
 struct Base_PlayerMove
 {
@@ -90,8 +109,7 @@ struct Base_PlayerMove
 
 struct FPS_PlayerMove : Base_PlayerMove
 {
-	void operator()(ATwinStickShooterPawn* InPawn);//
-
+	void operator()(ATwinStickShooterPawn* InPawn);
 };
 
 struct God_PlayerMove : Base_PlayerMove

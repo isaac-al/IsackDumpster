@@ -21,6 +21,10 @@
 #include "TwinstickShooter.h"
 #include "Engine/Engine.h"
 #include "Engine/StaticMeshActor.h"
+#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+#include "Runtime/UMG/Public/Components/WidgetComponent.h"
+#include "Runtime/UMG/Public/Components/WidgetInteractionComponent.h"
+#include "Runtime/Engine/Public/DrawDebugHelpers.h"
 
 const FName ATwinStickShooterPawn::MoveForwardBinding("MoveForward");
 const FName ATwinStickShooterPawn::MoveRightBinding("MoveRight");
@@ -30,6 +34,51 @@ const FName ATwinStickShooterPawn::FireRightBinding("FireRight");
 bool bGravityEnabled = true;
 float m_fDeltaTime = 0.0f;
 
+const FVector MenuWidgetInterface::m_vOpenScale = FVector(0.12f, 0.12f, 0.15f);
+
+void ATwinStickShooterPawn::UpdatePlayerBehaviour()
+{
+	(*MoveBehaviour[m_eCurrentPlayerType])(this);
+}
+
+void ATwinStickShooterPawn::UpdateMenuOpenAnimation(EMenuWidgetState AnimType)
+{
+	int32 dir = AnimType == eMenuWidgetState_Opening ? 1 : -1;
+	FVector current_scale = MenuWidget->GetRelativeScale3D();
+	FVector EndScale   = MenuWidgetInterface::m_vOpenScale;
+	FVector StartScale = FVector(EndScale.X, EndScale.Y, 0.0f);
+
+	float d = m_fDeltaTime * MenuWidgetInterface::m_fOpenAnimSpeed;
+	MainMenuInterface.m_fMenuOpenAlpha = FMath::Clamp(MainMenuInterface.m_fMenuOpenAlpha + (d * dir), 0.0f, 1.0f);
+	float result_alpha = UKismetMathLibrary::Ease(0.0f, 1.0f, MainMenuInterface.m_fMenuOpenAlpha, EEasingFunc::EaseInOut, 3);
+	FVector interp_loc = FMath::Lerp(StartScale, EndScale, result_alpha);
+	MenuWidget->SetRelativeScale3D(interp_loc);
+
+	if (MainMenuInterface.m_fMenuOpenAlpha <= 0 && dir < 0)
+	{
+		MainMenuInterface.m_eMenuWidgetState = eMenuWidgetState_Closed;
+	}
+	else if (MainMenuInterface.m_fMenuOpenAlpha >= 1 && dir > 0)
+	{
+		MainMenuInterface.m_eMenuWidgetState = eMenuWidgetState_Open;
+	}
+}
+
+void ATwinStickShooterPawn::OnOpenMenu()
+{
+	switch (MainMenuInterface.m_eMenuWidgetState)
+	{
+	case eMenuWidgetState_Closed:
+	case eMenuWidgetState_Closing:
+		MainMenuInterface.m_eMenuWidgetState = eMenuWidgetState_Opening;
+		break;
+	case eMenuWidgetState_Open:
+	case eMenuWidgetState_Opening:
+		MainMenuInterface.m_eMenuWidgetState = eMenuWidgetState_Closing;
+	break;
+	}
+}
+
 ATwinStickShooterPawn::ATwinStickShooterPawn() : m_eCurrentPlayerType(ePlayerType_FPS)
 {		
 	//static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("/Game/Meshes/SM_Ship.SM_Ship"));
@@ -38,10 +87,9 @@ ATwinStickShooterPawn::ATwinStickShooterPawn() : m_eCurrentPlayerType(ePlayerTyp
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
 	RootComponent = CapsuleComponent;
-
-	// Cache our sound effect
-	static ConstructorHelpers::FObjectFinder<USoundBase> FireAudio(TEXT("/Game/TwinStick/Audio/TwinStickFire.TwinStickFire"));
-	FireSound = FireAudio.Object;
+	MenuWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("MenuWidgetComponent"));
+	MenuWidget->AttachTo(RootComponent);
+	WidgetInteractionComponent = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteractionComponent"));
 
 	// Create a camera...
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CamerComponent"));
@@ -55,7 +103,6 @@ ATwinStickShooterPawn::ATwinStickShooterPawn() : m_eCurrentPlayerType(ePlayerTyp
 	CapsuleComponent->SetLinearDamping(10.0f);
 	CapsuleComponent->SetAngularDamping(3.0f);
 	CapsuleComponent->BodyInstance.bLockTranslation = false;
-	//CapsuleComponent->BodyInstance.bLockZTranslation = false;
 	CapsuleComponent->SetConstraintMode(EDOFMode::SixDOF);
 	CapsuleComponent->BodyInstance.bLockZRotation = true;
 	CapsuleComponent->BodyInstance.bLockXRotation = true;
@@ -73,7 +120,6 @@ ATwinStickShooterPawn::ATwinStickShooterPawn() : m_eCurrentPlayerType(ePlayerTyp
 
 	PrimaryActorTick.bCanEverTick = true;
 }
-
 
 // Called when the game starts or when spawned
 void ATwinStickShooterPawn::BeginPlay()
@@ -105,6 +151,19 @@ void ATwinStickShooterPawn::BeginPlay()
 	flock_default->SetActorLocation(TargetMesh->GetActorLocation());
 	flock_default->Init(EEnemyBehavaiour::eNavigate | EEnemyBehavaiour::eShoot, default_state, 128, FLinearColor::Blue, .3f, 75, TargetMesh);
 	m_fDeltaTime = 0.0f;
+	MenuWidget->SetRelativeScale3D(FVector::ZeroVector);
+	UClass* widget_class = StaticLoadClass(UUserWidget::StaticClass(), NULL, TEXT("/Game/Widgets/BP_MainMenu.BP_MainMenu_C"));
+	UUserWidget* widget = CreateWidget<UUserWidget>(GetWorld(), widget_class, TEXT("MainMenu"));
+	MenuWidget->SetWidget(widget);
+	MenuWidget->SetWindowFocusable(true);
+
+	WidgetInteractionComponent->InteractionDistance = 10000.0f;
+	WidgetInteractionComponent->InteractionSource = EWidgetInteractionSource::CenterScreen;
+	WidgetInteractionComponent->bEnableHitTesting = true;
+	WidgetInteractionComponent->bShowDebug = true;
+	WidgetInteractionComponent->SetRelativeLocation(FVector::ForwardVector * 100);
+	MainMenuInterface.m_eMenuWidgetState = eMenuWidgetState_Closed;
+	MainMenuInterface.m_fMenuOpenAlpha = 0.0f;
 }
 
 void ATwinStickShooterPawn::EndPlay(EEndPlayReason::Type)
@@ -127,6 +186,7 @@ void ATwinStickShooterPawn::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAxis("FlyUp");
 	PlayerInputComponent->BindAction("ToggleGravity", IE_Pressed, this, &ThisClass::OnToggleGravity);
 	PlayerInputComponent->BindAction("SwitchMode", IE_Pressed, this, &ThisClass::OnSwitchPlayerMode);
+	PlayerInputComponent->BindAction("OpenMenu", IE_Released, this, &ThisClass::OnOpenMenu);
 
 	FInputModeGameOnly input;
 	input.SetConsumeCaptureMouseDown(true);
@@ -137,6 +197,7 @@ void ATwinStickShooterPawn::SetupPlayerInputComponent(class UInputComponent* Pla
 void ATwinStickShooterPawn::OnToggleGravity()
 {
 	CapsuleComponent->SetEnableGravity(bGravityEnabled = !bGravityEnabled);
+	WidgetInteractionComponent->PressAndReleaseKey(EKeys::LeftMouseButton);
 }
 
 FTransform PrevTransform;
@@ -146,7 +207,7 @@ float m_fPlayerModeAlpha = 0.0f;
 
 void ATwinStickShooterPawn::OnSwitchPlayerMode()
 {
-	m_eCurrentPlayerType = ePlayerType((1 + m_eCurrentPlayerType + NUM_PLAYER_TYPE) % NUM_PLAYER_TYPE);
+	m_eCurrentPlayerType = EPlayerType((1 + m_eCurrentPlayerType + NUM_PLAYER_TYPE) % NUM_PLAYER_TYPE);
 
 	PrevTransform.SetLocation(GetActorLocation());
 	PrevTransform.SetRotation(CameraComponent->GetComponentRotation().Quaternion());
@@ -185,6 +246,24 @@ void ATwinStickShooterPawn::OnSwitchPlayerMode()
 	m_bPlayerModeAnimate = true;
 }
 
+void ATwinStickShooterPawn::AnimatePlayerTransform()
+{
+	m_fPlayerModeAlpha += m_fDeltaTime;
+
+	float result_alpha = UKismetMathLibrary::Ease(0.0f, 1.0f, m_fPlayerModeAlpha, EEasingFunc::EaseOut, 5);
+
+	FQuat interp_rot = FQuat::Slerp(PrevTransform.GetRotation(), CurrentTransform.GetRotation(), result_alpha);
+	FVector interp_loc = FMath::Lerp(PrevTransform.GetLocation(), CurrentTransform.GetLocation(), result_alpha);
+	CameraComponent->SetRelativeRotation(interp_rot);
+	SetActorLocation(interp_loc);
+
+	if (m_fPlayerModeAlpha >= 1.0f)
+	{
+		m_bPlayerModeAnimate = false;
+		CurrentRotation = CameraComponent->GetRelativeRotation();
+	}
+}
+
 void ATwinStickShooterPawn::Tick(float DeltaSeconds)
 {	
 	m_fDeltaTime = DeltaSeconds;
@@ -193,24 +272,40 @@ void ATwinStickShooterPawn::Tick(float DeltaSeconds)
 	if (m_bPlayerModeAnimate)
 	{
 		// Animate Transform!
-		m_fPlayerModeAlpha += m_fDeltaTime;
-
-		float result_alpha = UKismetMathLibrary::Ease(0.0f, 1.0f, m_fPlayerModeAlpha, EEasingFunc::EaseOut, 5);
-
-		FQuat interp_rot = FQuat::Slerp(PrevTransform.GetRotation(), CurrentTransform.GetRotation(), result_alpha);
-		FVector interp_loc = FMath::Lerp(PrevTransform.GetLocation(), CurrentTransform.GetLocation(), result_alpha);
-		CameraComponent->SetRelativeRotation(interp_rot);
-		SetActorLocation(interp_loc);
-
-		if (m_fPlayerModeAlpha >= 1.0f)
-		{
-			m_bPlayerModeAnimate = false;
-			CurrentRotation = CameraComponent->GetRelativeRotation();
-		}
+		AnimatePlayerTransform();
 	}
 	else
 	{
-		(*MoveBehaviour[m_eCurrentPlayerType])(this);
+		FVector cam_forward = CameraComponent->GetForwardVector();
+		cam_forward.Z = 0.0f;
+
+		FRotator menu_rotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), GetActorLocation() + cam_forward * 200.0f);
+		menu_rotation += FRotator::MakeFromEuler(FVector(0.0f,0.0f,180.0f));
+		FVector menu_location = cam_forward * 200.0f;
+		MenuWidget->SetRelativeRotation(menu_rotation);
+		MenuWidget->SetRelativeLocation(menu_location);
+		DrawDebugBox(GetWorld(), GetActorLocation() + CameraComponent->GetForwardVector() * 200.0f, FVector(50.0f, 100.0f, 50.0f), MenuWidget->GetRelativeRotation().Quaternion(), FColor::Emerald, false, -1, 0, 10.0f);
+
+		switch (MainMenuInterface.m_eMenuWidgetState)
+		{
+		case eMenuWidgetState_Closed:
+		{
+			UpdatePlayerBehaviour();
+		} break;
+		case eMenuWidgetState_Open:
+		{
+			// Poll menu inputs etc.
+		} break;
+		case eMenuWidgetState_Opening:
+		{
+			UpdateMenuOpenAnimation(eMenuWidgetState_Opening);
+		} break;
+		case eMenuWidgetState_Closing:
+		{
+			UpdateMenuOpenAnimation(eMenuWidgetState_Closing);
+		} break;
+		default: break;
+		}
 	}
 }
 
@@ -219,8 +314,8 @@ void FPS_PlayerMove::operator()(ATwinStickShooterPawn* InPawn)
 	ATwinStickShooterPawn& p = (*InPawn);
 
 	//// ====== Camera Rotation ========================
-	float y{ InPawn->GetInputAxisValue("LookUp") };
-	float x{ InPawn->GetInputAxisValue("LookRight") };
+	float y{ p.GetInputAxisValue("LookUp") };
+	float x{ p.GetInputAxisValue("LookRight") };
 	p.CurrentRotation.Pitch += y;
 	p.CurrentRotation.Yaw += x;
 	p.CurrentRotation.Pitch = FMath::Clamp(p.CurrentRotation.Pitch, -45.0f, 45.0f);
@@ -239,7 +334,7 @@ void FPS_PlayerMove::operator()(ATwinStickShooterPawn* InPawn)
 	Cast<UPrimitiveComponent>(p.RootComponent)->BodyInstance.AddForce(dir * p.MoveSpeed);
 	//// ===============================================
 
-	extern bool bGravityEnabled;
+	//extern bool bGravityEnabled;
 
 	if (!bGravityEnabled)
 	{

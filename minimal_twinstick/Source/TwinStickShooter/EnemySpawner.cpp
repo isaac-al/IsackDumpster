@@ -15,7 +15,6 @@
 
 AEnemySpawner::AEnemySpawner()
 {
-	TArray<AEnemy*> SpawnedEnemies = TArray<AEnemy*>();
 
 	//SetActorTickEnabled(true); 
 	PrimaryActorTick.bCanEverTick = true;
