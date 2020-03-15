@@ -14,6 +14,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE( FPlayerDead );
 class ATwinStickShooterProjectile;
 class USphereComponent;
 
+UENUM()
+enum class EPlayerType : uint8
+{
+	ePlayerType_God,
+	ePlayerType_FPS
+};
+
 enum EMenuWidgetState
 {
 	eMenuWidgetState_Closed = 0,
@@ -44,9 +51,6 @@ protected:
 	UPROPERTY(Category = Camera, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* CameraComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
-	TSubclassOf<ATwinStickShooterProjectile> ProjectileClass;
-
 	// Forward declaring friend struct instead of using getters and setters
 	friend struct Base_PlayerMove;
 	friend struct FPS_PlayerMove;
@@ -54,13 +58,13 @@ protected:
 
 	Base_PlayerMove* MoveBehaviour[NUM_PLAYER_TYPE];
 	
-	enum EPlayerType
-	{
-		ePlayerType_God,
-		ePlayerType_FPS
-	};
-
+	UPROPERTY(Replicated)
 	EPlayerType m_eCurrentPlayerType;
+
+	UPROPERTY(Replicated)
+	FRotator SimulatedRotation;
+
+	UPROPERTY(Replicated)
 	FRotator CurrentRotation{ FRotator::ZeroRotator };
 	MenuWidgetInterface MainMenuInterface;
 
@@ -68,9 +72,31 @@ protected:
 	void UpdateMenuOpenAnimation(enum EMenuWidgetState AnimType);
 	void UpdatePlayerBehaviour();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 public:
 
 	ATwinStickShooterPawn();
+
+	// ====== REPLICATION TEST ===================
+	UPROPERTY(Replicated)
+	int32 ReplicationTestCount = 0;
+
+	UPROPERTY(Replicated)
+	FVector MoveDirectionBuffer = FVector::ZeroVector;
+
+	UFUNCTION(Server, unreliable, WithValidation) 
+	void Server_IncreaseVariable();
+
+	UFUNCTION(Server, reliable, WithValidation)
+	void Server_ReplicateRotation(FRotator InRotation);
+
+	UFUNCTION(Server, reliable, WithValidation)
+	void Server_RequestMove(FVector InDirection);
+
+	UFUNCTION()
+	void OnRep_Count();
+	// ===========================================
 
 	/* The speed our ship moves around the level */
 	UPROPERTY(Category = Gameplay, EditAnywhere, BlueprintReadWrite)
@@ -95,16 +121,18 @@ public:
 	static const FName FireForwardBinding;
 	static const FName FireRightBinding;
 
+	FVector GetMoveDirection();
+
 public:
 
 	/** Returns CameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetCameraComponent() const { return CameraComponent; }
-private:
+	FORCEINLINE void SetPawnBehaviour(const EPlayerType& In) { m_eCurrentPlayerType = In; }
 };
 
 struct Base_PlayerMove
 {
-	virtual void operator()(ATwinStickShooterPawn* InPawn) = 0;// { QUICK_LOG_UPDATE(TEXT("BASE MOVE")); return InTransform; }
+	virtual void operator()(ATwinStickShooterPawn* InPawn) = 0;
 };
 
 struct FPS_PlayerMove : Base_PlayerMove

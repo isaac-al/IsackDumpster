@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+//#include "UnrealNetwork.h"
+//#include "Online.h"
+#include "Engine\Engine.h"
 
 #define QUICK_LOG(text) GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, text);
 #define QUICK_LOG_UPDATE(text) GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Green, text);

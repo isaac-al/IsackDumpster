@@ -10,6 +10,7 @@ public class TwinStickShooter : ModuleRules
         ShadowVariableWarningLevel = WarningLevel.Error;
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         bEnforceIWYU = true;
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "Slate" });
-	}
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG", "Slate", "Networking", "OnlineSubsystem", "OnlineSubsystemUtils" });
+        DynamicallyLoadedModuleNames.Add("OnlineSubsystemNull");
+    }
 }
