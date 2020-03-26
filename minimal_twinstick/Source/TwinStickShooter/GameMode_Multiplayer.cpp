@@ -51,5 +51,9 @@ void AGameMode_Multiplayer::PostLogin(APlayerController* NewPlayer)
 	ActiveControllers.Push(NewPlayer);
 
 	ATwinStickShooterPawn* GodPawn = Cast<ATwinStickShooterPawn>(ActiveControllers[0]->GetPawn());
-	//GodPawn->SetPawnBehaviour(EPlayerType::ePlayerType_God);
+	
+	if (GodPawn->m_eCurrentPlayerType == EPlayerType::ePlayerType_FPS)
+	{
+		GodPawn->OnSwitchPlayerMode();
+	}
 }

@@ -57,9 +57,6 @@ protected:
 	friend struct God_PlayerMove;
 
 	Base_PlayerMove* MoveBehaviour[NUM_PLAYER_TYPE];
-	
-	UPROPERTY(Replicated)
-	EPlayerType m_eCurrentPlayerType;
 
 	UPROPERTY(Replicated)
 	FRotator SimulatedRotation;
@@ -77,6 +74,9 @@ protected:
 public:
 
 	ATwinStickShooterPawn();
+
+	UPROPERTY(Replicated)
+	EPlayerType m_eCurrentPlayerType;
 
 	// ====== REPLICATION TEST ===================
 	UPROPERTY(Replicated)

@@ -74,22 +74,35 @@ public:
 */
 	bool JoinSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, const FOnlineSessionSearchResult& SearchResult);
 
-	/**
-*	Delegate fired when a session join request has completed
-*
-*	@param SessionName the name of the session this callback is for
-*	@param bWasSuccessful true if the async action completed without error, false if there was an error
-*/
+		/**
+	*	Delegate fired when a session join request has completed
+	*
+	*	@param SessionName the name of the session this callback is for
+	*	@param bWasSuccessful true if the async action completed without error, false if there was an error
+	*/
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
-	UFUNCTION(BlueprintCallable, Category = "Network|Test")
-		void StartOnlineGame();
+	/**
+	*	Delegate fired when a destroying an online session has completed
+	*
+	*	@param SessionName the name of the session this callback is for
+	*	@param bWasSuccessful true if the async action completed without error, false if there was an error
+	*/
+	virtual void OnDestroySessionComplete(FName SessionName, bool bWasSuccessful);
+
+
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Test")
-		void FindOnlineGames();
+	void StartOnlineGame();
 
 	UFUNCTION(BlueprintCallable, Category = "Network|Test")
-		void JoinOnlineGame();
+	void FindOnlineGames();
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Test")
+	void JoinOnlineGame();
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Test")
+	void DestroySessionAndLeaveGame();
 
 	/** Delegate for joining a session */
 	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
@@ -107,6 +120,12 @@ public:
 
 	/** Handle to registered delegate for searching a session */
 	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
+
+	/** Delegate for destroying a session */
+	FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegate;
+
+	/** Handle to registered delegate for destroying a session */
+	FDelegateHandle OnDestroySessionCompleteDelegateHandle;
 
 	/** Handles to registered delegates for creating/starting a session */
 	FDelegateHandle OnCreateSessionCompleteDelegateHandle;

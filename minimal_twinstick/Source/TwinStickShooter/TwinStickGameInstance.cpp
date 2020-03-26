@@ -20,7 +20,7 @@ UTwinStickGameInstance::UTwinStickGameInstance(const FObjectInitializer& ObjectI
 	OnJoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnJoinSessionComplete);
 
 	/** Bind function for DESTROYING a Session */
-	//OnDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &ThisClass::OnDestroySessionComplete);
+	OnDestroySessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &ThisClass::OnDestroySessionComplete);
 }
 
 bool UTwinStickGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers)
@@ -298,6 +298,47 @@ void UTwinStickGameInstance::JoinOnlineGame()
 				JoinSession(Player->PlayerState->UniqueId.GetUniqueNetId(), GameSessionName, SearchResult);
 				break;
 			}
+		}
+	}
+}
+
+void UTwinStickGameInstance::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("OnDestroySessionComplete %s, %d"), *SessionName.ToString(), bWasSuccessful));
+
+	// Get the OnlineSubsystem we want to work with
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		// Get the SessionInterface from the OnlineSubsystem
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if (Sessions.IsValid())
+		{
+			// Clear the Delegate
+			Sessions->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandle);
+
+			// If it was successful, we just load another level (could be a MainMenu!)
+			if (bWasSuccessful)
+			{
+				UGameplayStatics::OpenLevel(GetWorld(), "ThirdPersonExampleMap", true);
+			}
+		}
+	}
+}
+
+void UTwinStickGameInstance::DestroySessionAndLeaveGame()
+{
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+
+		if (Sessions.IsValid())
+		{
+			Sessions->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegate);
+
+			Sessions->DestroySession(GameSessionName);
 		}
 	}
 }

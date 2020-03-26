@@ -98,7 +98,7 @@ FVector ATwinStickShooterPawn::GetMoveDirection()
 
 void ATwinStickShooterPawn::UpdateMenuOpenAnimation(EMenuWidgetState AnimType)
 {
-	if (Role == ROLE_AutonomousProxy)
+	if (Role == ROLE_AutonomousProxy || IsNetMode(NM_Standalone))
 	{
 		int32 dir = AnimType == eMenuWidgetState_Opening ? 1 : -1;
 		FVector current_scale = MenuWidget->GetRelativeScale3D();
@@ -415,7 +415,6 @@ void FPS_PlayerMove::operator()(ATwinStickShooterPawn* InPawn)
 	else if (local_role == ROLE_Authority)
 	{
 		Cast<UPrimitiveComponent>(p.RootComponent)->BodyInstance.AddForce(p.MoveDirectionBuffer * p.MoveSpeed);
-		p.MoveDirectionBuffer = FVector::ZeroVector;
 	}
 	else if (local_role == ROLE_AutonomousProxy)
 	{
@@ -446,3 +445,11 @@ void God_PlayerMove::operator()(ATwinStickShooterPawn* InPawn)
 // - Integrate physics on server x
 // - Replicate other client pawn x
 // - Smooth player movement
+
+// === Player Movement Interpolation ===============
+//	Player location (0,0,0)
+//	Tick time (0.03)
+//	Send requested move direction to server (0,1,0)
+//	Packet transfer rate (0.05)
+//	
+// =================================================
